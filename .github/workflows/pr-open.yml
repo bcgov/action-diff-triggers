@@ -1,0 +1,46 @@
+name: PR
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-true:
+    name: Test for True
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        id: test
+        with:
+          triggers: ('.github/workflows/' 'action.yml')
+
+  test-false:
+    name: Test for False
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        id: test
+        with:
+          triggers: ('path/to/nowhere')
+
+  results:
+    name: Results
+    needs: [test-true, test-false]
+    runs-on: ubuntu-22.04
+    steps:
+      - run: |
+          echo "needs.test-true.outputs.triggered: ${{ needs.test-true.outputs.triggered }}"
+          echo "needs.test-false.outputs.triggered: ${{ needs.test-false.outputs.triggered }}"
+
+      - if: needs.test-true.outputs.triggered != 'true' || needs.test-false.outputs.triggered != 'false'
+        run: |
+          exit 1
