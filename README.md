@@ -1,10 +1,12 @@
-# action-diff-triggers
+# Trigger if Files Changed
+
+[![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](
 Check if files have changed.  For Actions with trigger parameters.
 
 <!-- Badges -->
 [![Issues](https://img.shields.io/github/issues/bcgov-nr/action-diff-triggers)](/../../issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/bcgov-nr/action-conditional-container-builder)](/../../pulls)
-[![MIT License](https://img.shields.io/github/license/bcgov-nr/action-conditional-container-builder.svg)](/LICENSE)
+[![Pull Requests](https://img.shields.io/github/issues-pr/bcgov-nr/action-diff-triggers)](/../../pulls)
+[![MIT License](https://img.shields.io/github/license/bcgov-nr/action-diff-triggers.svg)](/LICENSE)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
 # Conditional Container Builder with Fallback
