@@ -8,6 +8,7 @@ inputs:
   ### Required
   triggers:
     description: Paths used to trigger an event; e.g. ('./backend/' './frontend/)
+    required: true
 
   ### Usually a bad idea / not recommended
   diff_branch:
