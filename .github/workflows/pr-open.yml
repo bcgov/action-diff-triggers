@@ -37,16 +37,12 @@ jobs:
     needs: [test-true, test-false]
     runs-on: ubuntu-22.04
     steps:
-      - if: ${{ needs.test-true.outputs.triggered }} == 'true'
-        run: |
-          echo "Trigger result: ${{ needs.test-true.outputs.triggered }}"
-
-      - if: ${{ needs.test-false.outputs.triggered }} == 'false'
-        run: |
-          echo "Trigger result: ${{ needs.test-false.outputs.triggered }}"
-
-      - if: ${{ needs.test-true.outputs.triggered }} != 'true' || ${{ needs.test-false.outputs.triggered }} == 'false'
+      - if: ${{ needs.test-true.outputs.triggered }} != 'true' || ${{ needs.test-false.outputs.triggered }} != 'false'
         run: |
           echo "Trigger result: ${{ needs.test-true.outputs.triggered }}"
           echo "Trigger result: ${{ needs.test-false.outputs.triggered }}"
           exit 1
+
+      - run: |
+          echo "needs.test-true.outputs.triggered: ${{ needs.test-true.outputs.triggered }}"
+          echo "needs.test-false.outputs.triggered: ${{ needs.test-false.outputs.triggered }}"
