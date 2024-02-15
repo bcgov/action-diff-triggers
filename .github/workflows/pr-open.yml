@@ -8,8 +8,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test:
-    name: Test
+  test-true:
+    name: Test for True
     outputs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-22.04
@@ -20,10 +20,33 @@ jobs:
         with:
           triggers: ('.github/workflows/' 'action.yml')
 
-  results:
-    name: Results
-    needs: test
+  test-false:
+    name: Test for False
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-22.04
     steps:
-      - run: |
-          echo "Trigger result: ${{ needs.test.outputs.triggered }}"
+      - uses: actions/checkout@v4
+      - uses: ./
+        id: test
+        with:
+          triggers: ('path/to/nowhere')
+
+  results:
+    name: Results
+    needs: [test-true, test-false]
+    runs-on: ubuntu-22.04
+    steps:
+      - if: ${{ needs.test-true.outputs.triggered }} == 'true'
+        run: |
+          echo "Trigger result: ${{ needs.test-true.outputs.triggered }}"
+
+      - if: ${{ needs.test-false.outputs.triggered }} == 'false'
+        run: |
+          echo "Trigger result: ${{ needs.test-false.outputs.triggered }}"
+
+      - if: ${{ needs.test-true.outputs.triggered }} != 'true' || ${{ needs.test-false.outputs.triggered }} == 'false'
+        run: |
+          echo "Trigger result: ${{ needs.test-true.outputs.triggered }}"
+          echo "Trigger result: ${{ needs.test-false.outputs.triggered }}"
+          exit 1
