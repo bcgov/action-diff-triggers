@@ -16,3 +16,11 @@ jobs:
       - uses: ./
         with:
           triggers: ('.github/workflows/' 'action.yml')
+
+  results:
+    name: Results
+    needs: test
+    runs-on: ubuntu-22.04
+    steps:
+      - run: |
+          echo "Trigger result: ${{ needs.test.outputs.triggered }}"
