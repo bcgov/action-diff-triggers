@@ -1,7 +1,5 @@
-# Trigger if Files Changed
-
-[![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](
-Check if files have changed.  For Actions with trigger parameters.
+[![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
+[![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
 <!-- Badges -->
 [![Issues](https://img.shields.io/github/issues/bcgov-nr/action-diff-triggers)](/../../issues)
@@ -9,219 +7,72 @@ Check if files have changed.  For Actions with trigger parameters.
 [![MIT License](https://img.shields.io/github/license/bcgov-nr/action-diff-triggers.svg)](/LICENSE)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
-# Conditional Container Builder with Fallback
+# Diff File Changes with Triggers
 
-This action builds Docker/Podman containers conditionally using a set of directories.  If any files were changed matching that, then build a container.  If those files were not changed, retag an existing build.
-
-This is useful in CI/CD pipelines where not every package/app needs to be rebuilt.
-
-This tool is currently strongly opinionated and generatess images with a rigid structure below.  This is intended to become more flexible in future.
-
-Package name: `<organization>/<repository>/<package>:<tag>`
-
-Pull with: `docker pull ghcr.io/<organization>/<repository>/<package>:<tag>` 
-
-Only GitHub Container Registry (ghcr.io) is supported so far.
+Check triggers against a diff of changed files.  For Actions with trigger parameters, like builders and deployers.
 
 # Usage
 
 ```yaml
-- uses: bcgov-nr/action-builder-ghcr@vX.Y.X
+- uses: bcgov-nr/action-diff-triggers@vX.Y.X
   with:
     ### Required
 
-    # Package name
-    package: frontend
-
-    # Tag name (<package>:<tag>)
-    tag: ${{ github.event.number }}
-
-
-    ### Typical / recommended
-
-    # Fallback tag, used if no build was generated
-    # Optional, defaults to nothing, which forces a build
-    # Non-matching or malformed tags are rejected, which also forced a build
-    tag_fallback: test
-
-    # Bash array to diff for build triggering
-    # Optional, defaults to nothing, which forces a build
-    triggers: ('frontend/' 'backend/' 'database/')
-
-    # Sets the build context/directory, which contains the build files
-    # Optional, defaults to package name
-    build_context: ./frontend
-
-    # Sets the Dockerfile with path
-    # Optional, defaults to {package}/Dockerfile or {build_context}/Dockerfile
-    build_file: ./frontend/Dockerfile
-
-    # Number of packages to keep if cleaning up previous builds
-    # Optional, skips if not provided
-    keep_versions: 50
-
+    # Paths used to check against file change (diff)
+    triggers: ('./backend/' './frontend/)
 
     ### Usually a bad idea / not recommended
 
-    # Sets a list of [build-time variables](https://docs.docker.com/engine/reference/commandline/buildx_build/#build-arg)
-    # Optional, defaults to sample content
-    build_args: |
-      ENV=build
-
-    # Overrides the default branch to diff against
-    # Defaults to the default branch, usually `main`
-    diff_branch: ${{ github.event.repository.default_branch }}
-
-    # Regex for tags to skip when cleaning up packages; defaults to test and prod
-    # Only used when keep_versions is provided
-    keep_regex: "^(prod|test)$"
-
-    # Repository to clone and process
-    # Useful for consuming other repos, like in testing
-    # Defaults to the current one
-    repository: ${{ github.repository }}
-
-    # Specify token (GH or PAT), instead of inheriting one from the calling workflow
-    token: ${{ secrets.GITHUB_TOKEN }}
-
-```
-
-# Example, Single Build
-
-Build a single subfolder with a Dockerfile in it.  Deletes old packages, keeping the last 50.  Runs on pull requests (PRs).
-
-Create or modify a GitHub workflow, like below.  E.g. `./github/workflows/pr-open.yml`
-
-```yaml
-name: Pull Request
-
-on:
-  pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  builds:
-    permissions:
-      packages: write
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Builds
-        uses: bcgov-nr/action-builder-ghcr@vX.Y.Z
-        with:
-          package: frontend
-          keep_versions: 50
-          tag: ${{ github.event.number }}
-          tag_fallback: test
-          token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ('frontend/')
-```
-
-# Example, Single Build with build_context and build_file
-
-Same as previous, but specifying build folder and Dockerfile.
-
-Create or modify a GitHub workflow, like below.  E.g. `./github/workflows/pr-open.yml`
-
-```yaml
-name: Pull Request
-
-on:
-  pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  builds:
-    permissions:
-      packages: write
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Builds
-        uses: bcgov-nr/action-builder-ghcr@vX.Y.Z
-        with:
-          package: frontend
-          build_context: ./
-          build_file: subdir/Dockerfile
-          keep_versions: 50
-          tag: ${{ github.event.number }}
-          tag_fallback: test
-          token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ('frontend/')
-```
-
-# Example, Matrix Build
-
-Build from multiple subfolders with Dockerfile in them.  This time an outside repository is used.  Runs on pull requests (PRs).
-
-Create or modify a GitHub workflow, like below.  E.g. `./github/workflows/pr-open.yml`
-
-```yaml
-name: Pull Request
-
-on:
-  pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  builds:
-    permissions:
-      packages: write
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        package: [backend, frontend]
-        include:
-          - package: backend
-            triggers: ('backend/')
-          - package: frontend
-            triggers: ('frontend/')
-    steps:
-      - uses: actions/checkout@v3
-      - name: Test Builds
-        uses: bcgov-nr/action-builder-ghcr@vX.Y.Z
-        with:
-          package: ${{ matrix.package }}
-          tag: ${{ github.event.number }}
-          tag_fallback: test
-          repository: bcgov/nr-quickstart-typescript
-          token: ${{ secrets.GITHUB_TOKEN }}
-          triggers: ${{ matrix.triggers }}
-
+    # Branch to diff against, defaults to the default branch
+    diff_branch: main
 ```
 
 # Output
 
-The build will return image digests as output.
+The build will true if triggers fire, false otherwise.
+
+# Example, Typical Pattern
+
+Check if files have changed, then do something else.  This is useful for cases like builds, where a job is usually only needed conditionally.
+
+Please replace `@vX.Y.Z` with the latest version number.
 
 ```yaml
-- id: meaningful_id_name
-  uses: bcgov-nr/action-builder-ghcr@vX.Y.Z
-  ...
+on:
+  pull_request:
 
-- id: deploy_with_digest
-  name: Deploy with digest
-  with:
-    digest: ${{ steps.meaningful_id_name.outputs.digest }}
-  ...
-```
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
-# Permissions
+jobs:
+  check:
+    name: Check Triggers Against Diff
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: bcgov-nr/action-diff-triggers@vX.Y.Z
+        id: test
+        with:
+          triggers: ('backend/' 'frontend')
+  
+  results:
+    name: Results of Trigger Action
+    needs: [check]
+    runs-on: ubuntu-22.04
+    steps:
+      - name: If True
+        if: needs.check.outputs.triggered == 'true'
+        uses: bcgov-nr/action-diff-triggers@vX.Y.Z
+        run: |
+          echo "Yes, there are triggered changes!"
 
-Workflows kicked off by Dependabot or a fork run with reduced permissions.  That can be addressed by setting explict permissions for the GITHUB_TOKEN.  If this is not required, then remove the lines below from these examples.
-
-```yaml
-permissions:
-  packages: write
+      - name: If True
+        if: needs.check.outputs.triggered == 'false'
+        uses: bcgov-nr/action-diff-triggers@vX.Y.Z
+        run: |
+          echo "No, there are not triggered changes!"
 ```
 
 <!-- # Acknowledgements
