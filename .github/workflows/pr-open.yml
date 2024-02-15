@@ -18,7 +18,7 @@ jobs:
       - uses: ./
         id: test
         with:
-          triggers: ('.github/workflows/' 'action.yml' '*.md')
+          triggers: ('.github/workflows/' 'action.yml' '.md')
 
   test-false:
     name: Test for False
