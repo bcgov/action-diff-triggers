@@ -10,10 +10,13 @@ concurrency:
 jobs:
   test:
     name: Test
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: ./
+        id: test
         with:
           triggers: ('.github/workflows/' 'action.yml')
 
