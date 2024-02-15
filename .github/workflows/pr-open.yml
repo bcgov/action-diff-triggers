@@ -41,6 +41,6 @@ jobs:
           echo "needs.test-true.outputs.triggered: ${{ needs.test-true.outputs.triggered }}"
           echo "needs.test-false.outputs.triggered: ${{ needs.test-false.outputs.triggered }}"
 
-      - if: ${{ needs.test-true.outputs.triggered }} != 'true' || ${{ needs.test-false.outputs.triggered }} != 'false'
+      - if: needs.test-true.outputs.triggered != 'true' || needs.test-false.outputs.triggered != 'false'
         run: |
           exit 1
