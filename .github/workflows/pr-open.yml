@@ -53,8 +53,8 @@ jobs:
           echo "needs.test-omitted.outputs.triggered: ${{ needs.test-false.outputs.triggered }} - expected: true"
 
       - if:
-          needs.test-true.outputs.triggered != 'true' || \
-          needs.test-false.outputs.triggered != 'false' || \
+          needs.test-true.outputs.triggered != 'true' ||
+          needs.test-false.outputs.triggered != 'false' ||
           needs.test-omitted.outputs.triggered != 'true'
         run: |
           exit 1
