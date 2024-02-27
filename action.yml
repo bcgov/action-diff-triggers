@@ -6,9 +6,11 @@ branding:
 
 inputs:
   ### Required
+  # Nothing!
+
+  ### Typical / recommended
   triggers:
-    description: Paths used to trigger an event; e.g. ('./backend/' './frontend/)
-    required: true
+    description: Paths used to trigger an event; e.g. ('./backend/' './frontend/); always trigger if omitted
 
   ### Usually a bad idea / not recommended
   diff_branch:
@@ -29,6 +31,13 @@ runs:
       shell: bash
       id: diff
       run: |
+        # Always fire if triggers are omitted
+        if [ -z "${{ inputs.triggers }}" ]; then
+          echo "Always fire when triggers are omitted!"
+          echo "triggered=true" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
         # Build if changed files (git diff) match triggers
         TRIGGERS=${{ inputs.triggers }}
         git fetch origin ${{ inputs.diff_branch }}
@@ -45,5 +54,5 @@ runs:
         done < <(git diff origin/${{ inputs.diff_branch }} --name-only)
 
         # If at this point, no trigger has fired
-        echo "Container build not required"
+        echo "Triggers have not fired"
         echo "triggered=false" >> $GITHUB_OUTPUT
