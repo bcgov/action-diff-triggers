@@ -32,15 +32,28 @@ jobs:
         with:
           triggers: ('path/to/nowhere')
 
-  results:
-    name: Results
-    needs: [test-true, test-false]
+  test-omitted:
+    name: Test for Omitted
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-22.04
     steps:
-      - run: |
-          echo "needs.test-true.outputs.triggered: ${{ needs.test-true.outputs.triggered }}"
-          echo "needs.test-false.outputs.triggered: ${{ needs.test-false.outputs.triggered }}"
+      - uses: actions/checkout@v4
+      - uses: ./
+        id: test
 
-      - if: needs.test-true.outputs.triggered != 'true' || needs.test-false.outputs.triggered != 'false'
+  results:
+    name: Results
+    needs: [test-true, test-false, test-omitted]
+    runs-on: ubuntu-22.04
+    steps:
+      - if:
+          needs.test-true.outputs.triggered != 'true' ||
+          needs.test-false.outputs.triggered != 'false' ||
+          needs.test-omitted.outputs.triggered != 'true'
         run: |
+          # Explain any errors
+          echo "needs.test-true.outputs.triggered: ${{ needs.test-true.outputs.triggered }} - expected: true"
+          echo "needs.test-false.outputs.triggered: ${{ needs.test-false.outputs.triggered }} - expected: false"
+          echo "needs.test-omitted.outputs.triggered: ${{ needs.test-false.outputs.triggered }} - expected: true"
           exit 1
