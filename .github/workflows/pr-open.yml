@@ -12,7 +12,7 @@ jobs:
     name: Test for True
     outputs:
       triggered: ${{ steps.test.outputs.triggered }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: ./
@@ -24,7 +24,7 @@ jobs:
     name: Test for False
     outputs:
       triggered: ${{ steps.test.outputs.triggered }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: ./
@@ -36,7 +36,7 @@ jobs:
     name: Test for Omitted
     outputs:
       triggered: ${{ steps.test.outputs.triggered }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: ./
@@ -45,7 +45,7 @@ jobs:
   results:
     name: Results
     needs: [test-true, test-false, test-omitted]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - if:
           needs.test-true.outputs.triggered != 'true' ||
