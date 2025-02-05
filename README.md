@@ -19,7 +19,7 @@ Check triggers against a diff of changed files.  For Actions with trigger parame
     ### Required
 
     # Paths used to check against file change (diff)
-    triggers: ('backend' 'frontend)
+    triggers: ('backend' 'frontend')
 
     ### Usually a bad idea / not recommended
 
