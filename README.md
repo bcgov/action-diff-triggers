@@ -14,12 +14,12 @@ Check triggers against a diff of changed files.  For Actions with trigger parame
 # Usage
 
 ```yaml
-- uses: bcgov-nr/action-diff-triggers@vX.Y.X
+- uses: bcgov-nr/action-diff-triggers@vX.Y.Z
   with:
     ### Required
 
     # Paths used to check against file change (diff)
-    triggers: ('./backend/' './frontend/)
+    triggers: ('backend' 'frontend)
 
     ### Usually a bad idea / not recommended
 
