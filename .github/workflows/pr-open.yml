@@ -16,7 +16,7 @@ jobs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - uses: ./
         id: test
         with:
@@ -28,7 +28,7 @@ jobs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - uses: ./
         id: test
         with:
@@ -40,7 +40,7 @@ jobs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - uses: ./
         id: test
 
