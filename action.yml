@@ -27,6 +27,10 @@ runs:
   steps:
     # Check if a build is required (steps.build.outputs.triggered=true|false)
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      with:
+        fetch-depth: 0
+        repository: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.repo.full_name || github.repository }}
+        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.sha || github.ref }}
     - name: Diff for changes
       shell: bash
       id: diff
@@ -40,7 +44,17 @@ runs:
 
         # Build if changed files (git diff) match triggers
         TRIGGERS=${{ inputs.triggers }}
-        git fetch origin ${{ inputs.diff_branch }}
+        
+        # For fork PRs, fetch base repo's diff_branch from base remote
+        if [ "${{ github.event_name }}" == "pull_request_target" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+          git remote add base ${{ github.event.repository.html_url }}.git || true
+          git fetch base ${{ inputs.diff_branch }}
+          DIFF_REF="base/${{ inputs.diff_branch }}"
+        else
+          git fetch origin ${{ inputs.diff_branch }}
+          DIFF_REF="origin/${{ inputs.diff_branch }}"
+        fi
+        
         while read -r check; do
           for t in "${TRIGGERS[@]}"; do
             if [[ "${check}" =~ "${t}" ]]; then
@@ -51,7 +65,7 @@ runs:
                 exit 0
             fi
           done
-        done < <(git diff origin/${{ inputs.diff_branch }} --name-only)
+        done < <(git diff "$DIFF_REF" --name-only)
 
         # If at this point, no trigger has fired
         echo "Triggers have not fired"
