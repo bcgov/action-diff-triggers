@@ -39,10 +39,10 @@ Check triggers against a diff of changed files. Supports PR events (including fo
 
     ### Optional
 
-    # Reference to compare against (must exist on remote)
+    # Reference to compare against
     # - PR events: defaults to base repo default branch
-    # - Other events (push, workflow_dispatch, etc.): defaults to repository default branch
-    ref: main  # or commit SHA, branch, tag (not local refs like HEAD^)
+    # - Other events (push, workflow_dispatch, etc.): defaults to HEAD^
+    ref: main  # or 'HEAD^', commit SHA, branch, tag. Local refs (HEAD^) work for non-PR events
 ```
 
 # Output
