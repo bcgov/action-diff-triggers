@@ -31,10 +31,12 @@ runs:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.event.pull_request.head.sha }}
 
-    - name: Diff for changes
-      shell: bash
+    - shell: bash
       id: diff
       run: |
+        # Diff for changes
+        set -e
+
         # Always fire if triggers are omitted
         if [ -z "${{ inputs.triggers }}" ]; then
           echo "Always fire when triggers are omitted!"
@@ -59,7 +61,7 @@ runs:
                 exit 0
             fi
           done
-        done < <(git diff "to_diff/${{ inputs.diff_branch }}" --name-only)
+        done < <(git diff "to_diff/${{ inputs.diff_branch }}...HEAD" --name-only)
 
         # If at this point, no trigger has fired
         echo "Triggers have not fired"
