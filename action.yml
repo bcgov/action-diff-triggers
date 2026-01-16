@@ -28,7 +28,7 @@ runs:
     # Detect fork PRs and set checkout/diff variables
     # For fork PRs in pull_request_target context: checkout fork repo, compare against base repo
     # For non-fork PRs: checkout base repo, compare against base repo's diff_branch
-    - name: Determine fork handling
+    - name: Vars and fork handling
       shell: bash
       id: fork
       run: |
@@ -39,19 +39,21 @@ runs:
           echo "ref=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
           echo "is_fork=true" >> $GITHUB_OUTPUT
           echo "base_repo_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
+          echo "diff_ref=base/${{ inputs.diff_branch }}" >> $GITHUB_OUTPUT
         else
           # Non-fork: checkout base repo
           echo "repository=${{ github.repository }}" >> $GITHUB_OUTPUT
           echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
           echo "is_fork=false" >> $GITHUB_OUTPUT
+          echo "diff_ref=origin/${{ inputs.diff_branch }}" >> $GITHUB_OUTPUT
         fi
-    
+
     # Checkout the determined repository at the determined ref
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
         repository: ${{ steps.fork.outputs.repository }}
         ref: ${{ steps.fork.outputs.ref }}
-    
+
     - name: Diff for changes
       shell: bash
       id: diff
@@ -66,17 +68,14 @@ runs:
         # Build if changed files (git diff) match triggers
         TRIGGERS=${{ inputs.triggers }}
 
-        # Fetch base repo's diff_branch for comparison
-        # For fork PRs: add base repo as remote and fetch from it
-        # For non-fork PRs: fetch from origin (already checked out)
+        # Fetch base repo's diff_branch for comparison (DIFF_REF determined in first step)
         if [ "${{ steps.fork.outputs.is_fork }}" = "true" ]; then
           git remote set-url base ${{ steps.fork.outputs.base_repo_url }} 2>/dev/null || git remote add base ${{ steps.fork.outputs.base_repo_url }}
           git fetch base ${{ inputs.diff_branch }}
-          DIFF_REF="base/${{ inputs.diff_branch }}"
         else
           git fetch origin ${{ inputs.diff_branch }}
-          DIFF_REF="origin/${{ inputs.diff_branch }}"
         fi
+        DIFF_REF="${{ steps.fork.outputs.diff_ref }}"
 
         while read -r check; do
           for t in "${TRIGGERS[@]}"; do
