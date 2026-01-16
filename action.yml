@@ -14,7 +14,7 @@ inputs:
 
   ### Usually a bad idea / not recommended
   ref:
-    description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). Defaults to base repo default branch for PRs, or HEAD^ for non-PR events
+    description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). Defaults to base repo default branch for PRs, or HEAD^ for non-PR events. Local refs (HEAD^, HEAD~2) work for non-PR events; remote refs (branches, tags, SHAs) work for all events
     required: false
 
 outputs:
@@ -55,14 +55,17 @@ runs:
           [[ -n "$line" ]] && TRIGGERS+=("$line")
         done < <(grep -o "'[^']*'" <<< "$TRIGGERS_STR" | sed "s/'//g")
 
-        # Determine reference to compare against (works for all events)
-        COMPARE_REF="${{ inputs.ref || github.event.pull_request.base.repo.default_branch || 'HEAD^' }}"
+        # Determine reference to compare against
+        BASE_REF="${{ inputs.ref || github.event.pull_request.base.repo.default_branch || 'HEAD^' }}"
+        git remote add base "${{ github.event.pull_request.base.repo.clone_url || github.event.repository.clone_url }}"
         
-        # For PR events, fetch from base repo and prefix
-        if [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
-          git remote add base "${{ github.event.pull_request.base.repo.clone_url }}"
-          git fetch base "$COMPARE_REF"
-          COMPARE_REF="base/$COMPARE_REF"
+        # If BASE_REF starts with HEAD, it's a local ref - use it directly
+        # Otherwise, fetch from remote and prefix
+        if [[ "$BASE_REF" == HEAD* ]]; then
+          COMPARE_REF="$BASE_REF"
+        else
+          git fetch base "$BASE_REF"
+          COMPARE_REF="base/$BASE_REF"
         fi
 
         # Check if any changed file matches any trigger using git diff's pathspec matching
