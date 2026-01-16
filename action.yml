@@ -48,7 +48,7 @@ runs:
         # Parse triggers input into array (handles space-separated values with parentheses/quotes)
         TRIGGERS_STR="${{ inputs.triggers }}"
         # Remove parentheses and single quotes, then split by spaces into array
-        TRIGGERS_STR=$(echo "$TRIGGERS_STR" | sed "s/[()']//g")
+        TRIGGERS_STR=$(sed "s/[()']//g" <<< "$TRIGGERS_STR")
         IFS=' ' read -ra TRIGGERS <<< "$TRIGGERS_STR"
 
         # Add remote and fetch branch (treats forks and non-forks the same)
