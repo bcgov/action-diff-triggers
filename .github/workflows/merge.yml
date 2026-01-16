@@ -60,7 +60,7 @@ jobs:
         id: test
         with:
           triggers: ('.github/' 'action.yml' '.md')
-          ref: HEAD~2
+          ref: 'HEAD~2'
         # Should trigger if files changed in last 2 commits
 
   results:
