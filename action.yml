@@ -41,9 +41,9 @@ runs:
           echo "fetch_remote=base" >> $GITHUB_OUTPUT
           echo "fetch_remote_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
         else
-          # Non-fork: checkout base repo (use PR head SHA if available, else current ref)
+          # Non-fork: checkout base repo at PR head SHA
           echo "repository=${{ github.repository }}" >> $GITHUB_OUTPUT
-          echo "ref=${{ github.event.pull_request.head.sha || github.ref }}" >> $GITHUB_OUTPUT
+          echo "ref=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
           echo "diff_ref=origin/${{ inputs.diff_branch }}" >> $GITHUB_OUTPUT
           echo "fetch_remote=origin" >> $GITHUB_OUTPUT
         fi
