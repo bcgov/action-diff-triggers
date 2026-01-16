@@ -25,12 +25,33 @@ outputs:
 runs:
   using: composite
   steps:
-    # Check if a build is required (steps.build.outputs.triggered=true|false)
+    # Detect fork PRs and set checkout/diff variables
+    # For fork PRs in pull_request_target context: checkout fork repo, compare against base repo
+    # For non-fork PRs: checkout base repo, compare against base repo's diff_branch
+    - name: Determine fork handling
+      shell: bash
+      id: fork
+      run: |
+        # Check if this is a fork PR in pull_request_target context
+        if [ "${{ github.event_name }}" = "pull_request_target" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+          # Fork PR: checkout fork repo, compare against base repo
+          echo "repository=${{ github.event.pull_request.head.repo.full_name }}" >> $GITHUB_OUTPUT
+          echo "ref=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+          echo "is_fork=true" >> $GITHUB_OUTPUT
+          echo "base_repo_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
+        else
+          # Non-fork: checkout base repo
+          echo "repository=${{ github.repository }}" >> $GITHUB_OUTPUT
+          echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
+          echo "is_fork=false" >> $GITHUB_OUTPUT
+        fi
+    
+    # Checkout the determined repository at the determined ref
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
-        # Fork PRs: checkout fork repo at fork SHA, else checkout base repo at current ref
-        repository: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.repo.full_name || github.repository }}
-        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.sha || github.ref }}
+        repository: ${{ steps.fork.outputs.repository }}
+        ref: ${{ steps.fork.outputs.ref }}
+    
     - name: Diff for changes
       shell: bash
       id: diff
@@ -44,17 +65,19 @@ runs:
 
         # Build if changed files (git diff) match triggers
         TRIGGERS=${{ inputs.triggers }}
-        
-        # For fork PRs: fetch base repo's diff_branch, else fetch from origin
-        if [ "${{ github.event_name }}" = "pull_request_target" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-          git remote set-url base ${{ github.event.repository.clone_url }} 2>/dev/null || git remote add base ${{ github.event.repository.clone_url }}
+
+        # Fetch base repo's diff_branch for comparison
+        # For fork PRs: add base repo as remote and fetch from it
+        # For non-fork PRs: fetch from origin (already checked out)
+        if [ "${{ steps.fork.outputs.is_fork }}" = "true" ]; then
+          git remote set-url base ${{ steps.fork.outputs.base_repo_url }} 2>/dev/null || git remote add base ${{ steps.fork.outputs.base_repo_url }}
           git fetch base ${{ inputs.diff_branch }}
           DIFF_REF="base/${{ inputs.diff_branch }}"
         else
           git fetch origin ${{ inputs.diff_branch }}
           DIFF_REF="origin/${{ inputs.diff_branch }}"
         fi
-        
+
         while read -r check; do
           for t in "${TRIGGERS[@]}"; do
             if [[ "${check}" =~ "${t}" ]]; then
