@@ -16,10 +16,6 @@ inputs:
   base_ref:
     description: Base reference to compare against (e.g., 'main', 'HEAD^', commit SHA). Defaults to base repo default branch for PRs, or HEAD^ for non-PR events
     required: false
-  
-  diff_branch:
-    description: Deprecated: use base_ref instead. Will be removed in the next major release. For backward compatibility, if provided, used as base_ref
-    required: false
 
 outputs:
   triggered:
@@ -60,19 +56,9 @@ runs:
         done < <(grep -o "'[^']*'" <<< "$TRIGGERS_STR" | sed "s/'//g")
 
         # Determine base reference (what to compare against)
-        # Support diff_branch for backward compatibility (workflow_dispatch triggered from PRs)
         if [ -n "${{ inputs.base_ref }}" ]; then
           # User provided base_ref
           BASE_REF="${{ inputs.base_ref }}"
-        elif [ -n "${{ inputs.diff_branch }}" ]; then
-          # Backward compatibility: diff_branch provided
-          BASE_REF="${{ inputs.diff_branch }}"
-          # For PR events, fetch from base repo; for workflow_dispatch, use local branch
-          if [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
-            git remote add to_diff "${{ github.event.pull_request.base.repo.clone_url }}"
-            git fetch to_diff "$BASE_REF"
-            BASE_REF="to_diff/$BASE_REF"
-          fi
         elif [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
           # PR event: use base repo default branch
           BASE_REF="${{ github.event.pull_request.base.repo.default_branch }}"
