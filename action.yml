@@ -59,6 +59,12 @@ runs:
         if [ -n "${{ inputs.ref }}" ]; then
           # User provided ref
           COMPARE_REF="${{ inputs.ref }}"
+          # For PR events, always fetch from base repo (ref is relative to base, not PR branch)
+          if [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
+            git remote add base "${{ github.event.pull_request.base.repo.clone_url }}"
+            git fetch base "$COMPARE_REF"
+            COMPARE_REF="base/$COMPARE_REF"
+          fi
         elif [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
           # PR event: use base repo default branch
           git remote add base "${{ github.event.pull_request.base.repo.clone_url }}"
