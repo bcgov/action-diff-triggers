@@ -46,8 +46,8 @@ runs:
         TRIGGERS=${{ inputs.triggers }}
         
         # For fork PRs: fetch base repo's diff_branch, else fetch from origin
-        if [ "${{ github.event_name }}" == "pull_request_target" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-          git remote add base ${{ github.event.repository.html_url }}.git || true
+        if [ "${{ github.event_name }}" = "pull_request_target" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+          git remote set-url base ${{ github.event.repository.clone_url }} 2>/dev/null || git remote add base ${{ github.event.repository.clone_url }}
           git fetch base ${{ inputs.diff_branch }}
           DIFF_REF="base/${{ inputs.diff_branch }}"
         else
