@@ -26,8 +26,6 @@ runs:
   using: composite
   steps:
     # Detect fork PRs and set checkout/diff variables
-    # For fork PRs in pull_request_target context: checkout fork repo, compare against base repo
-    # For non-fork PRs: checkout base repo, compare against base repo's diff_branch
     - name: Vars and fork handling
       shell: bash
       id: fork
@@ -35,11 +33,11 @@ runs:
         # Check if this is a fork PR (head repo != base repo)
         if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
           # Fork PR: fetch from base remote
-          echo "fetch_remote=base" >> $GITHUB_OUTPUT
-          echo "fetch_remote_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
+          echo "remote=base" >> $GITHUB_OUTPUT
+          echo "clone_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
         else
           # Non-fork: fetch from origin
-          echo "fetch_remote=origin" >> $GITHUB_OUTPUT
+          echo "remote=origin" >> $GITHUB_OUTPUT
         fi
 
     # Checkout the determined repository at the determined ref
@@ -63,12 +61,11 @@ runs:
         TRIGGERS=${{ inputs.triggers }}
 
         # Fetch diff_branch for comparison
-        # For forks: set up base remote (fetch_remote_url only exists for forks)
-        if [ -n "${{ steps.fork.outputs.fetch_remote_url }}" ]; then
-          git remote add ${{ steps.fork.outputs.fetch_remote }} ${{ steps.fork.outputs.fetch_remote_url }}
+        # For forks: set up base remote (clone_url only exists for forks)
+        if [ -n "${{ steps.fork.outputs.clone_url }}" ]; then
+          git remote add ${{ steps.fork.outputs.remote }} ${{ steps.fork.outputs.clone_url }}
         fi
-        git fetch ${{ steps.fork.outputs.fetch_remote }} ${{ inputs.diff_branch }}
-        DIFF_REF=${{ steps.fork.outputs.fetch_remote }}/${{ inputs.diff_branch }}
+        git fetch ${{ steps.fork.outputs.remote }} ${{ inputs.diff_branch }}
 
         while read -r check; do
           for t in "${TRIGGERS[@]}"; do
@@ -80,7 +77,7 @@ runs:
                 exit 0
             fi
           done
-        done < <(git diff "$DIFF_REF" --name-only)
+        done < <(git diff "${{ steps.fork.outputs.remote }}/${{ inputs.diff_branch }}" --name-only)
 
         # If at this point, no trigger has fired
         echo "Triggers have not fired"
