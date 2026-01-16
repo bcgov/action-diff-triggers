@@ -50,7 +50,7 @@ jobs:
         # Should always trigger when triggers omitted
 
   test-ref-custom:
-    name: Test Merge (Custom ref: HEAD~2)
+    name: Test Merge (Custom ref)
     outputs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
@@ -60,12 +60,13 @@ jobs:
         id: test
         with:
           triggers: ('.github/' 'action.yml' '.md')
-          ref: 'HEAD~2'
+          ref: "HEAD~2"
         # Should trigger if files changed in last 2 commits
 
   results:
     name: Results
-    needs: [test-push-event, test-push-false, test-push-omitted, test-ref-custom]
+    needs:
+      [test-push-event, test-push-false, test-push-omitted, test-ref-custom]
     runs-on: ubuntu-24.04
     steps:
       - if: needs.test-push-event.outputs.triggered != 'true' ||
