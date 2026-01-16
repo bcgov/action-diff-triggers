@@ -28,8 +28,10 @@ runs:
     # Check if a build is required (steps.build.outputs.triggered=true|false)
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
-        fetch-depth: 0
+        # For fork PRs in pull_request_target context: checkout fork repo, else checkout base repo
+        # Condition: if (pull_request_target event AND head repo != base repo) then fork repo, else base repo
         repository: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.repo.full_name || github.repository }}
+        # For fork PRs in pull_request_target context: checkout fork head SHA, else checkout current ref
         ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && github.event.pull_request.head.sha || github.ref }}
     - name: Diff for changes
       shell: bash
