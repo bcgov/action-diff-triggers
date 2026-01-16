@@ -1,5 +1,5 @@
 name: Diff Triggers
-description: Check if changed files match trigger paths. Returns true if any trigger matches, false otherwise. Always returns true if triggers are omitted.
+description: Check if changed files match trigger paths. Returns true if any trigger matches, false otherwise. Always returns true if triggers or ref are omitted.
 branding:
   icon: package
   color: blue
@@ -14,7 +14,7 @@ inputs:
 
   ### Usually a bad idea / not recommended
   ref:
-    description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). Defaults to base repo default branch for PRs, or HEAD^ for non-PR events. Local refs (HEAD^, HEAD~2) work for non-PR events; remote refs (branches, tags, SHAs) work for all events
+    description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). If omitted, always returns true (useful for deployer workflows). Local refs (HEAD^, HEAD~2) work for non-PR events; remote refs (branches, tags, SHAs) work for all events
     required: false
 
 outputs:
@@ -46,6 +46,13 @@ runs:
           exit 0
         fi
 
+        # Always fire if ref is omitted (useful for deployer workflows)
+        if [ -z "${{ inputs.ref }}" ]; then
+          echo "Always fire when ref is omitted!"
+          echo "triggered=true" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+
         # Build if changed files (git diff) match triggers
         # Parse triggers input into array (properly handles quoted strings with spaces)
         TRIGGERS_STR="${{ inputs.triggers }}"
@@ -55,7 +62,7 @@ runs:
           [[ -n "$line" ]] && TRIGGERS+=("$line")
         done < <(grep -o "'[^']*'" <<< "$TRIGGERS_STR" | sed "s/'//g")
 
-        # Determine reference to compare against
+        # Determine reference to compare against (ref is required at this point)
         BASE_REF="${{ inputs.ref || github.event.pull_request.base.repo.default_branch || 'HEAD^' }}"
         git remote add base "${{ github.event.pull_request.base.repo.clone_url || github.event.repository.clone_url }}"
         

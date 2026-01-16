@@ -17,7 +17,7 @@ Check triggers against a diff of changed files. Supports PR events (including fo
 ## Features
 
 - ✅ **Fork PR Support**: Automatically handles fork and non-fork PRs
-- ✅ **Push Event Support**: Compare HEAD vs HEAD^ in push events
+- ✅ **Push Event Support**: Works with push events for deployer workflows
 - ✅ **Flexible Ref Comparison**: Compare against any ref (branch, commit SHA, HEAD^, etc.)
 - ✅ **Smart Path Matching**: Uses git pathspec matching for accurate trigger detection
 - ✅ **Space Handling**: Properly handles trigger paths containing spaces
@@ -35,9 +35,9 @@ Check triggers against a diff of changed files. Supports PR events (including fo
 
     ### Optional
 
-    # Reference to compare against
-    # - PR events: defaults to base repo default branch
-    # - Other events (push, workflow_dispatch, etc.): defaults to HEAD^
+    # Reference to compare against (optional)
+    # - If omitted: always returns true (useful for deployer workflows)
+    # - If provided: compares against specified ref (branch, commit SHA, tag, or local ref like HEAD^)
     ref: main  # Optional: branch, commit SHA, tag, or local ref (HEAD^, HEAD~2). Local refs work for non-PR events only
 ```
 
@@ -87,7 +87,7 @@ jobs:
 
 ## Push Event
 
-Compare current commit to previous commit (HEAD vs HEAD^):
+For deployer workflows, omit `ref` to always trigger. To compare against previous commit, specify `ref: HEAD^`:
 
 ```yaml
 on:
@@ -101,12 +101,12 @@ jobs:
         id: test
         with:
           triggers: ('backend/' 'frontend/')
-          # ref defaults to HEAD^ for push events
+          # Omit ref to always trigger, or specify ref: HEAD^ to compare against previous commit
 ```
 
 ## Workflow Dispatch Event
 
-Works with manual triggers and other events. Defaults to comparing HEAD vs HEAD^:
+Works with manual triggers and other events. Omit `ref` to always trigger:
 
 ```yaml
 on:
@@ -120,8 +120,7 @@ jobs:
       - uses: bcgov-nr/action-diff-triggers@vX.Y.Z
         with:
           triggers: ('backend/')
-          # ref defaults to HEAD^ for non-PR events
-          # Can override: ref: main
+          # Omit ref to always trigger, or specify ref: HEAD^ to compare against previous commit
 ```
 
 ## Compare Against Specific Commit
