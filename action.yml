@@ -21,10 +21,6 @@ inputs:
     description: Deprecated: use base_ref instead. Will be removed in the next major release. For backward compatibility, if provided, used as base_ref
     required: false
 
-  head_ref:
-    description: Head reference to checkout (the code to compare). Defaults to PR head SHA for PRs, or current ref for non-PR events
-    required: false
-
 outputs:
   triggered:
     description: Boolean result of triggers
@@ -37,7 +33,7 @@ runs:
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
         repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
-        ref: ${{ inputs.head_ref || github.event.pull_request.head.sha || github.ref }}
+        ref: ${{ github.event.pull_request.head.sha || github.ref }}
         # Fetch 2 commits for non-PR events to ensure HEAD^ is available (defaults to 1 for PRs)
         fetch-depth: ${{ github.event.pull_request && 1 || 0 }}
 

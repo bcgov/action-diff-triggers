@@ -37,11 +37,6 @@ Check triggers against a diff of changed files. Supports PR events (including fo
     # - Other events (push, workflow_dispatch, etc.): defaults to HEAD^
     base_ref: main  # or 'HEAD^', commit SHA, branch, tag
 
-    # Head reference to checkout
-    # - PR events: defaults to PR head SHA
-    # - Other events: defaults to current ref (github.ref)
-    head_ref: HEAD  # or commit SHA, branch, tag
-
     ### Deprecated
     # diff_branch: main  # Deprecated: use base_ref instead. Will be removed in next major release.
 ```
