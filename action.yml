@@ -35,23 +35,18 @@ runs:
         # Check if this is a fork PR in pull_request_target context (only context where fork checkout is needed)
         if [ "${{ github.event_name }}" = "pull_request_target" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
           # Fork PR: checkout fork repo, compare against base repo
-          echo "repository=${{ github.event.pull_request.head.repo.full_name }}" >> $GITHUB_OUTPUT
           echo "fetch_remote=base" >> $GITHUB_OUTPUT
           echo "fetch_remote_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
         else
           # Non-fork: checkout base repo at PR head SHA
-          echo "repository=${{ github.repository }}" >> $GITHUB_OUTPUT
           echo "fetch_remote=origin" >> $GITHUB_OUTPUT
         fi
-
-        # Common to both cases
-        echo "ref=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
 
     # Checkout the determined repository at the determined ref
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
-        repository: ${{ steps.fork.outputs.repository }}
-        ref: ${{ steps.fork.outputs.ref }}
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.sha }}
 
     - name: Diff for changes
       shell: bash
