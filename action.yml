@@ -25,7 +25,7 @@ outputs:
 runs:
   using: composite
   steps:
-    # Checkout PR head (works for both fork and non-forks)
+    # Checkout PR head (works for both fork and non-fork PRs; requires pull_request or pull_request_target)
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -51,6 +51,8 @@ runs:
         git remote add to_diff "${{ github.event.repository.clone_url }}"
         git fetch to_diff ${{ inputs.diff_branch }}
 
+        # Use three-dot diff to show only PR changes (finds merge-base automatically)
+        BASE_SHA=$(git merge-base HEAD "to_diff/${{ inputs.diff_branch }}")
         while read -r check; do
           for t in "${TRIGGERS[@]}"; do
             if [[ "${check}" =~ "${t}" ]]; then
@@ -61,7 +63,7 @@ runs:
                 exit 0
             fi
           done
-        done < <(git diff "to_diff/${{ inputs.diff_branch }}...HEAD" --name-only)
+        done < <(git diff "$BASE_SHA" --name-only)
 
         # If at this point, no trigger has fired
         echo "Triggers have not fired"
