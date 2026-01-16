@@ -44,18 +44,34 @@ jobs:
       - uses: ./
         id: test
 
+  test-ref-custom:
+    name: Test Custom ref (HEAD^)
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: ./
+        id: test
+        with:
+          triggers: ('.github/' 'action.yml' '.md')
+          ref: HEAD^
+        # Should trigger when comparing PR head vs HEAD^ (previous commit)
+
   results:
     name: Results
-    needs: [test-true, test-false, test-omitted]
+    needs: [test-true, test-false, test-omitted, test-ref-custom]
     runs-on: ubuntu-24.04
     steps:
       - if:
           needs.test-true.outputs.triggered != 'true' ||
           needs.test-false.outputs.triggered != 'false' ||
-          needs.test-omitted.outputs.triggered != 'true'
+          needs.test-omitted.outputs.triggered != 'true' ||
+          needs.test-ref-custom.outputs.triggered != 'true'
         run: |
           # Explain any errors
           echo "needs.test-true.outputs.triggered: ${{ needs.test-true.outputs.triggered }} - expected: true"
           echo "needs.test-false.outputs.triggered: ${{ needs.test-false.outputs.triggered }} - expected: false"
           echo "needs.test-omitted.outputs.triggered: ${{ needs.test-omitted.outputs.triggered }} - expected: true"
+          echo "needs.test-ref-custom.outputs.triggered: ${{ needs.test-ref-custom.outputs.triggered }} - expected: true"
           exit 1
