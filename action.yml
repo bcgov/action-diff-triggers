@@ -1,5 +1,5 @@
 name: Check Changed Files Against Triggers
-description: Do changes match triggers?  Always trigger if triggers are omitted.
+description: Do changes match triggers? Supports PR and push events. Always trigger if triggers are omitted.
 branding:
   icon: package
   color: blue
@@ -14,8 +14,16 @@ inputs:
 
   ### Usually a bad idea / not recommended
   diff_branch:
-    description: Branch to diff against, defaults to the default branch
+    description: Branch to diff against, defaults to the default branch (deprecated, use compare_ref)
     default: ${{ github.event.pull_request.base.repo.default_branch }}
+  
+  compare_ref:
+    description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). Defaults to diff_branch for PRs, or HEAD^ for push events
+    required: false
+  
+  checkout_ref:
+    description: Reference to checkout. Defaults to PR head SHA for PRs, or current ref for push events
+    required: false
 
 outputs:
   triggered:
@@ -25,11 +33,11 @@ outputs:
 runs:
   using: composite
   steps:
-    # Checkout PR head (works for both fork and non-fork PRs; requires pull_request or pull_request_target)
+    # Checkout appropriate ref based on event type
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
-        repository: ${{ github.event.pull_request.head.repo.full_name }}
-        ref: ${{ github.event.pull_request.head.sha }}
+        repository: ${{ (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.event.pull_request.head.repo.full_name || github.repository }}
+        ref: ${{ inputs.checkout_ref || (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.event.pull_request.head.sha || github.ref }}
 
     - shell: bash
       id: diff
@@ -53,13 +61,24 @@ runs:
           [[ -n "$line" ]] && TRIGGERS+=("$line")
         done < <(grep -o "'[^']*'" <<< "$TRIGGERS_STR" | sed "s/'//g")
 
-        # Add remote and fetch branch (treats forks and non-forks the same)
-        git remote add to_diff "${{ github.event.pull_request.base.repo.clone_url }}"
-        git fetch to_diff ${{ inputs.diff_branch }}
+        # Determine compare reference
+        if [ -n "${{ inputs.compare_ref }}" ]; then
+          # User provided compare_ref (could be HEAD^, commit SHA, branch, tag)
+          COMPARE_REF="${{ inputs.compare_ref }}"
+        elif [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
+          # PR event: use diff_branch from base repo
+          COMPARE_REF="${{ inputs.diff_branch }}"
+          git remote add to_diff "${{ github.event.pull_request.base.repo.clone_url }}"
+          git fetch to_diff "$COMPARE_REF"
+          COMPARE_REF="to_diff/$COMPARE_REF"
+        else
+          # Push event: default to HEAD^ (previous commit)
+          COMPARE_REF="HEAD^"
+        fi
 
         # Check if any changed file matches any trigger using git diff's pathspec matching
         for t in "${TRIGGERS[@]}"; do
-          if git diff "to_diff/${{ inputs.diff_branch }}" --name-only -- "$t" | grep -q .; then
+          if git diff "$COMPARE_REF" --name-only -- "$t" | grep -q .; then
             echo "Build triggered based on git diff"
             echo "triggered=true" >> $GITHUB_OUTPUT
             exit 0
