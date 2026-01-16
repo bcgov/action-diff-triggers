@@ -51,8 +51,6 @@ runs:
         git remote add to_diff "${{ github.event.repository.clone_url }}"
         git fetch to_diff ${{ inputs.diff_branch }}
 
-        # Use three-dot diff to show only PR changes (finds merge-base automatically)
-        BASE_SHA=$(git merge-base HEAD "to_diff/${{ inputs.diff_branch }}")
         while read -r check; do
           for t in "${TRIGGERS[@]}"; do
             if [[ "${check}" =~ "${t}" ]]; then
@@ -63,7 +61,7 @@ runs:
                 exit 0
             fi
           done
-        done < <(git diff "$BASE_SHA" --name-only)
+        done < <(git diff "to_diff/${{ inputs.diff_branch }}" --name-only)
 
         # If at this point, no trigger has fired
         echo "Triggers have not fired"
