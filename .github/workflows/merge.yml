@@ -1,0 +1,82 @@
+name: Merge
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  test-push-event:
+    name: Test Merge (HEAD vs HEAD^)
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: ./
+        id: test
+        with:
+          triggers: ('.github/' 'action.yml' '.md')
+        # Should trigger because we're comparing HEAD vs HEAD^ and these files changed
+
+  test-push-false:
+    name: Test Merge (No Match)
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: ./
+        id: test
+        with:
+          triggers: ('path/to/nowhere')
+        # Should not trigger
+
+  test-push-omitted:
+    name: Test Merge (Omitted Triggers)
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: ./
+        id: test
+        # Should always trigger when triggers omitted
+
+  test-ref-custom:
+    name: Test Merge (Custom ref)
+    outputs:
+      triggered: ${{ steps.test.outputs.triggered }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: ./
+        id: test
+        with:
+          triggers: ('.github/' 'action.yml' '.md')
+          ref: "HEAD~2"
+        # Should trigger if files changed in last 2 commits
+
+  results:
+    name: Results
+    needs:
+      [test-push-event, test-push-false, test-push-omitted, test-ref-custom]
+    runs-on: ubuntu-24.04
+    steps:
+      - if: needs.test-push-event.outputs.triggered != 'true' ||
+          needs.test-push-false.outputs.triggered != 'false' ||
+          needs.test-push-omitted.outputs.triggered != 'true' ||
+          needs.test-ref-custom.outputs.triggered != 'true'
+        run: |
+          # Explain any errors
+          echo "needs.test-push-event.outputs.triggered: ${{ needs.test-push-event.outputs.triggered }} - expected: true"
+          echo "needs.test-push-false.outputs.triggered: ${{ needs.test-push-false.outputs.triggered }} - expected: false"
+          echo "needs.test-push-omitted.outputs.triggered: ${{ needs.test-push-omitted.outputs.triggered }} - expected: true"
+          echo "needs.test-ref-custom.outputs.triggered: ${{ needs.test-ref-custom.outputs.triggered }} - expected: true"
+          exit 1

@@ -49,13 +49,12 @@ jobs:
     needs: [test-true, test-false, test-omitted]
     runs-on: ubuntu-24.04
     steps:
-      - if:
-          needs.test-true.outputs.triggered != 'true' ||
+      - if: needs.test-true.outputs.triggered != 'true' ||
           needs.test-false.outputs.triggered != 'false' ||
           needs.test-omitted.outputs.triggered != 'true'
         run: |
           # Explain any errors
           echo "needs.test-true.outputs.triggered: ${{ needs.test-true.outputs.triggered }} - expected: true"
           echo "needs.test-false.outputs.triggered: ${{ needs.test-false.outputs.triggered }} - expected: false"
-          echo "needs.test-omitted.outputs.triggered: ${{ needs.test-false.outputs.triggered }} - expected: true"
+          echo "needs.test-omitted.outputs.triggered: ${{ needs.test-omitted.outputs.triggered }} - expected: true"
           exit 1
