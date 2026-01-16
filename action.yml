@@ -56,23 +56,16 @@ runs:
         done < <(grep -o "'[^']*'" <<< "$TRIGGERS_STR" | sed "s/'//g")
 
         # Determine reference to compare against
-        if [ -n "${{ inputs.ref }}" ]; then
-          # User provided ref
-          COMPARE_REF="${{ inputs.ref }}"
-          # For PR events, always fetch from base repo (ref is relative to base, not PR branch)
-          if [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
-            git remote add base "${{ github.event.pull_request.base.repo.clone_url }}"
-            git fetch base "$COMPARE_REF"
-            COMPARE_REF="base/$COMPARE_REF"
-          fi
-        elif [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
-          # PR event: use base repo default branch
+        if [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
+          # PR event: always add base remote and fetch
           git remote add base "${{ github.event.pull_request.base.repo.clone_url }}"
-          git fetch base "${{ github.event.pull_request.base.repo.default_branch }}"
-          COMPARE_REF="base/${{ github.event.pull_request.base.repo.default_branch }}"
+          # Use provided ref or default to base repo default branch
+          COMPARE_REF="${{ inputs.ref || github.event.pull_request.base.repo.default_branch }}"
+          git fetch base "$COMPARE_REF"
+          COMPARE_REF="base/$COMPARE_REF"
         else
-          # Non-PR event: default to HEAD^ (previous commit)
-          COMPARE_REF="HEAD^"
+          # Non-PR event: use provided ref or default to HEAD^
+          COMPARE_REF="${{ inputs.ref || 'HEAD^' }}"
         fi
 
         # Check if any changed file matches any trigger using git diff's pathspec matching
