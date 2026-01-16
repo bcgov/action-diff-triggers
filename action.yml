@@ -45,11 +45,13 @@ runs:
         fi
 
         # Build if changed files (git diff) match triggers
-        # Parse triggers input into array (handles space-separated values with parentheses/quotes)
+        # Parse triggers input into array (properly handles quoted strings with spaces)
         TRIGGERS_STR="${{ inputs.triggers }}"
-        # Remove parentheses and single quotes, then split by spaces into array
-        TRIGGERS_STR=$(sed "s/[()']//g" <<< "$TRIGGERS_STR")
-        IFS=' ' read -ra TRIGGERS <<< "$TRIGGERS_STR"
+        # Extract all quoted strings preserving spaces within quotes
+        TRIGGERS=()
+        while IFS= read -r line; do
+          [[ -n "$line" ]] && TRIGGERS+=("$line")
+        done < <(grep -o "'[^']*'" <<< "$TRIGGERS_STR" | sed "s/'//g")
 
         # Add remote and fetch branch (treats forks and non-forks the same)
         git remote add to_diff "${{ github.event.pull_request.base.repo.clone_url }}"
