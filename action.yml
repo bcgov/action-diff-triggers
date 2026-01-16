@@ -33,7 +33,7 @@ runs:
       id: fork
       run: |
         # Check if this is a fork PR in pull_request_target context (only context where fork checkout is needed)
-        if [ "${{ github.event_name }}" = "pull_request_target" ] && [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
+        if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
           # Fork PR: checkout fork repo, compare against base repo
           echo "fetch_remote=base" >> $GITHUB_OUTPUT
           echo "fetch_remote_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
