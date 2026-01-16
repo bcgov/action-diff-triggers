@@ -1,5 +1,5 @@
-name: Conditional Container Builder with Fallback
-description: Build if trigger conditions are met, else use fallback image
+name: Check Changed Files Against Triggers
+description: Do changes match triggers?  Always trigger if triggers are omitted.
 branding:
   icon: package
   color: blue
@@ -45,7 +45,7 @@ runs:
         # Build if changed files (git diff) match triggers
         TRIGGERS=${{ inputs.triggers }}
 
-        # Fetch diff_branch for comparison (treats forks and non-forks the same)
+        # Add remote and fetch branch (treats forks and non-forks the same)
         git remote add to_diff "${{ github.event.repository.clone_url }}"
         git fetch to_diff ${{ inputs.diff_branch }}
 
