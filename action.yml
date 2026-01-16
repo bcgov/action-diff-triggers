@@ -59,8 +59,18 @@ runs:
 
         while read -r check; do
           for t in "${TRIGGERS[@]}"; do
-            # Use prefix matching to prevent false positives (e.g., './backend/' should match './backend/file.txt' but not './some-backend-file.txt')
-            if [[ "$check" == "$t"* ]]; then
+            # Smart matching: prefix match for directories (ends with /), exact match for files
+            matched=false
+            if [[ "$t" == */ ]]; then
+              # Directory: use prefix matching (e.g., './backend/' matches './backend/file.txt' but not './some-backend-file.txt')
+              [[ "$check" == "$t"* ]] && matched=true
+            else
+              # File: match if path ends with trigger (e.g., 'action.yml' matches 'action.yml', './action.yml', or 'path/to/action.yml')
+              # but not 'action.yml.backup' or 'action.yml2'
+              [[ "$check" == "$t" ]] || [[ "$check" == */"$t" ]] || [[ "$check" == "./$t" ]] && matched=true
+            fi
+            
+            if [[ "$matched" == "true" ]]; then
                 # Output triggered=true for next steps
                 echo "Build triggered based on git diff"
                 echo -e "${t}\n --> ${check}"
