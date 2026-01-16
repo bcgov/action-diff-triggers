@@ -57,5 +57,5 @@ jobs:
           # Explain any errors
           echo "needs.test-true.outputs.triggered: ${{ needs.test-true.outputs.triggered }} - expected: true"
           echo "needs.test-false.outputs.triggered: ${{ needs.test-false.outputs.triggered }} - expected: false"
-          echo "needs.test-omitted.outputs.triggered: ${{ needs.test-false.outputs.triggered }} - expected: true"
+          echo "needs.test-omitted.outputs.triggered: ${{ needs.test-omitted.outputs.triggered }} - expected: true"
           exit 1

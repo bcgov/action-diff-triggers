@@ -13,7 +13,7 @@ permissions: {}
 
 jobs:
   test-push-event:
-    name: Test Push Event (HEAD vs HEAD^)
+    name: Test Merge (HEAD vs HEAD^)
     outputs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
@@ -28,7 +28,7 @@ jobs:
         # Should trigger because we're comparing HEAD vs HEAD^ and these files changed
 
   test-push-false:
-    name: Test Push Event (No Match)
+    name: Test Merge (No Match)
     outputs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
@@ -43,7 +43,7 @@ jobs:
         # Should not trigger
 
   test-push-omitted:
-    name: Test Push Event (Omitted Triggers)
+    name: Test Merge (Omitted Triggers)
     outputs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
@@ -60,8 +60,7 @@ jobs:
     needs: [test-push-event, test-push-false, test-push-omitted]
     runs-on: ubuntu-24.04
     steps:
-      - if:
-          needs.test-push-event.outputs.triggered != 'true' ||
+      - if: needs.test-push-event.outputs.triggered != 'true' ||
           needs.test-push-false.outputs.triggered != 'false' ||
           needs.test-push-omitted.outputs.triggered != 'true'
         run: |
