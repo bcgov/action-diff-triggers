@@ -1,3 +1,13 @@
+
+## ⚠️ BREAKING CHANGES in v1.0
+
+- **`diff_branch` input removed**: Replaced with `ref` input
+  - `diff_branch` only supported branch names
+  - `ref` supports branches, commit SHAs, tags, and relative refs (e.g., `HEAD^`)
+  - **Migration**: Replace `diff_branch: main` with `ref: main`
+
+---
+
 [![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
@@ -32,10 +42,10 @@ Check triggers against a diff of changed files. Supports PR events (including fo
 
     ### Optional
 
-    # Base reference to compare against
+    # Reference to compare against
     # - PR events: defaults to base repo default branch
     # - Other events (push, workflow_dispatch, etc.): defaults to HEAD^
-    base_ref: main  # or 'HEAD^', commit SHA, branch, tag
+    ref: main  # or 'HEAD^', commit SHA, branch, tag
 ```
 
 # Output
@@ -98,7 +108,7 @@ jobs:
         id: test
         with:
           triggers: ('backend/' 'frontend/')
-          # base_ref defaults to HEAD^ for push events
+          # ref defaults to HEAD^ for push events
 ```
 
 ## Workflow Dispatch Event
@@ -116,8 +126,8 @@ jobs:
       - uses: bcgov-nr/action-diff-triggers@vX.Y.Z
         with:
           triggers: ('backend/')
-          # base_ref defaults to HEAD^ for non-PR events
-          # Can override: base_ref: main
+          # ref defaults to HEAD^ for non-PR events
+          # Can override: ref: main
 ```
 
 ## Compare Against Specific Commit
@@ -126,7 +136,7 @@ jobs:
 - uses: bcgov-nr/action-diff-triggers@vX.Y.Z
   with:
     triggers: ('backend/')
-    base_ref: abc123def456  # Compare against specific commit
+    ref: abc123def456  # Compare against specific commit
 ```
 
 ## Fork PR Support
