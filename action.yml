@@ -1,5 +1,5 @@
 name: Diff Triggers
-description: Check if changed files match trigger paths. Returns true if any trigger matches, false otherwise. Always returns true if triggers or ref are omitted.
+description: Check if changed files match trigger paths. Returns true if any trigger matches, false otherwise. Always returns true if triggers are omitted. For non-PR events, always returns true if ref is omitted (useful for deployer workflows).
 branding:
   icon: package
   color: blue
@@ -14,7 +14,7 @@ inputs:
 
   ### Usually a bad idea / not recommended
   ref:
-    description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). If omitted, always returns true (useful for deployer workflows). Local refs (HEAD^, HEAD~2) work for non-PR events; remote refs (branches, tags, SHAs) work for all events
+    description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). For PR events, defaults to base repo default branch if omitted. For non-PR events, always returns true if omitted (useful for deployer workflows). Local refs (HEAD^, HEAD~2) work for non-PR events; remote refs (branches, tags, SHAs) work for all events
     required: false
 
 outputs:
