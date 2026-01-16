@@ -36,12 +36,11 @@ runs:
         if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
           # Fork PR: fetch from base remote
           echo "fetch_remote=base" >> $GITHUB_OUTPUT
+          echo "fetch_remote_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
         else
           # Non-fork: fetch from origin
           echo "fetch_remote=origin" >> $GITHUB_OUTPUT
         fi
-        # Always set base repo URL (used for both fork and non-fork cases)
-        echo "fetch_remote_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
 
     # Checkout the determined repository at the determined ref
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -63,8 +62,11 @@ runs:
         # Build if changed files (git diff) match triggers
         TRIGGERS=${{ inputs.triggers }}
 
-        # Fetch diff_branch for comparison (remote determined in first step)
-        git remote set-url ${{ steps.fork.outputs.fetch_remote }} ${{ steps.fork.outputs.fetch_remote_url }} 2>/dev/null || git remote add ${{ steps.fork.outputs.fetch_remote }} ${{ steps.fork.outputs.fetch_remote_url }}
+        # Fetch diff_branch for comparison
+        # For forks: set up base remote (fetch_remote_url only exists for forks)
+        if [ -n "${{ steps.fork.outputs.fetch_remote_url }}" ]; then
+          git remote add ${{ steps.fork.outputs.fetch_remote }} ${{ steps.fork.outputs.fetch_remote_url }}
+        fi
         git fetch ${{ steps.fork.outputs.fetch_remote }} ${{ inputs.diff_branch }}
         DIFF_REF=${{ steps.fork.outputs.fetch_remote }}/${{ inputs.diff_branch }}
 
