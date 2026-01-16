@@ -35,9 +35,9 @@ Check triggers against a diff of changed files. Supports PR events (including fo
 
     ### Optional
 
-    # Reference to compare against (optional)
-    # - If omitted: always returns true (useful for deployer workflows)
-    # - If provided: compares against specified ref (branch, commit SHA, tag, or local ref like HEAD^)
+    # Reference to compare against
+    # - PR events: defaults to base repo default branch
+    # - Other events (push, workflow_dispatch, etc.): defaults to HEAD^
     ref: main  # Optional: branch, commit SHA, tag, or local ref (HEAD^, HEAD~2). Local refs work for non-PR events only
 ```
 
@@ -87,7 +87,7 @@ jobs:
 
 ## Push Event
 
-For deployer workflows, omit `ref` to always trigger. To compare against previous commit, specify `ref: HEAD^`:
+Compare current commit to previous commit (HEAD vs HEAD^):
 
 ```yaml
 on:
@@ -101,12 +101,12 @@ jobs:
         id: test
         with:
           triggers: ('backend/' 'frontend/')
-          # Omit ref to always trigger, or specify ref: HEAD^ to compare against previous commit
+          # ref defaults to HEAD^ for push events
 ```
 
 ## Workflow Dispatch Event
 
-Works with manual triggers and other events. Omit `ref` to always trigger:
+Works with manual triggers and other events. Defaults to comparing HEAD vs HEAD^:
 
 ```yaml
 on:
@@ -120,7 +120,8 @@ jobs:
       - uses: bcgov-nr/action-diff-triggers@vX.Y.Z
         with:
           triggers: ('backend/')
-          # Omit ref to always trigger, or specify ref: HEAD^ to compare against previous commit
+          # ref defaults to HEAD^ for non-PR events
+          # Can override: ref: main
 ```
 
 ## Compare Against Specific Commit

@@ -1,5 +1,5 @@
 name: Diff Triggers
-description: Check if changed files match trigger paths. Returns true if any trigger matches, false otherwise. Always returns true if triggers are omitted. For non-PR events, always returns true if ref is omitted (useful for deployer workflows).
+description: Check if changed files match trigger paths. Returns true if any trigger matches, false otherwise. Always returns true if triggers are omitted.
 branding:
   icon: package
   color: blue
@@ -14,7 +14,7 @@ inputs:
 
   ### Usually a bad idea / not recommended
   ref:
-    description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). For PR events, defaults to base repo default branch if omitted. For non-PR events, always returns true if omitted (useful for deployer workflows). Local refs (HEAD^, HEAD~2) work for non-PR events; remote refs (branches, tags, SHAs) work for all events
+    description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). Defaults to base repo default branch for PRs, or HEAD^ for non-PR events. Local refs (HEAD^, HEAD~2) work for non-PR events; remote refs (branches, tags, SHAs) work for all events
     required: false
 
 outputs:
@@ -59,14 +59,6 @@ runs:
         # PR events: default to base repo default branch if ref omitted
         # Non-PR events: default to HEAD^ if ref omitted
         BASE_REF="${{ inputs.ref || github.event.pull_request.base.repo.default_branch || 'HEAD^' }}"
-        
-        # Always fire if ref is omitted for non-PR events (useful for deployer workflows)
-        # This check happens after determining BASE_REF so we can check if it's a non-PR event
-        if [ -z "${{ inputs.ref }}" ] && [ "${{ github.event_name }}" != "pull_request" ] && [ "${{ github.event_name }}" != "pull_request_target" ]; then
-          echo "Always fire when ref is omitted for non-PR events!"
-          echo "triggered=true" >> $GITHUB_OUTPUT
-          exit 0
-        fi
         git remote add base "${{ github.event.pull_request.base.repo.clone_url || github.event.repository.clone_url }}"
         
         # If BASE_REF starts with HEAD, it's a local ref - use it directly
