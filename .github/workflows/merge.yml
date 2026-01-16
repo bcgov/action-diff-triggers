@@ -18,7 +18,7 @@ jobs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4
       - uses: ./
         id: test
         with:
@@ -31,7 +31,7 @@ jobs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4
       - uses: ./
         id: test
         with:
@@ -44,7 +44,7 @@ jobs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4
       - uses: ./
         id: test
         # Should always trigger when triggers omitted
@@ -55,7 +55,7 @@ jobs:
       triggered: ${{ steps.test.outputs.triggered }}
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@v4
       - uses: ./
         id: test
         with:
