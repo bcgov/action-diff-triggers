@@ -1,27 +1,23 @@
 
 ## ⚠️ BREAKING CHANGES in v1.0
 
-- **`diff_branch` replaced with `ref`, which supports branches, commit SHAs, tags, and relative refs (e.g., `HEAD^`)**
+- **`diff_branch` replaced with `ref`, which supports branches, commit SHAs, tags, and relative refs**
 
 ---
 
-[![MIT License](https://img.shields.io/github/license/bcgov/quickstart-openshift.svg)](/LICENSE.md)
-[![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
-
-<!-- Badges -->
-[![Issues](https://img.shields.io/github/issues/bcgov-nr/action-diff-triggers)](/../../issues)
-[![Pull Requests](https://img.shields.io/github/issues-pr/bcgov-nr/action-diff-triggers)](/../../pulls)
 [![MIT License](https://img.shields.io/github/license/bcgov-nr/action-diff-triggers.svg)](/LICENSE)
 [![Lifecycle](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
+[![Issues](https://img.shields.io/github/issues/bcgov-nr/action-diff-triggers)](/../../issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/bcgov-nr/action-diff-triggers)](/../../pulls)
 
 # Diff File Changes with Triggers
 
-Check triggers against a diff of changed files. Supports PR events (including fork PRs), push events, workflow_dispatch, and other GitHub Actions events. For Actions with trigger parameters, like builders and deployers.
+Check triggers against a diff of changed files. Supports PR events (including fork PRs), push events, workflow_dispatch, and other GitHub Actions events. Useful for conditional builds and deployments based on file changes.
 
 ## Features
 
 - ✅ **Fork PR Support**: Automatically handles fork and non-fork PRs
-- ✅ **Push Event Support**: Compare HEAD vs HEAD^ in push events
+- ✅ **Push Event Support**: Works with push events for deployer workflows
 - ✅ **Flexible Ref Comparison**: Compare against any ref (branch, commit SHA, HEAD^, etc.)
 - ✅ **Smart Path Matching**: Uses git pathspec matching for accurate trigger detection
 - ✅ **Space Handling**: Properly handles trigger paths containing spaces
@@ -42,7 +38,7 @@ Check triggers against a diff of changed files. Supports PR events (including fo
     # Reference to compare against
     # - PR events: defaults to base repo default branch
     # - Other events (push, workflow_dispatch, etc.): defaults to HEAD^
-    ref: main  # or 'HEAD^', commit SHA, branch, tag. Local refs (HEAD^) work for non-PR events
+    ref: main  # Branch, commit SHA, tag, or local ref (HEAD^, HEAD~2). Local refs work for non-PR events only
 ```
 
 # Output
@@ -76,7 +72,7 @@ jobs:
         id: test
         with:
           triggers: ('backend/' 'frontend/')
-  
+
   build:
     name: Build if Triggered
     needs: [check]
@@ -118,6 +114,7 @@ on:
 
 jobs:
   check:
+    name: Check Triggers
     runs-on: ubuntu-22.04
     steps:
       - uses: bcgov-nr/action-diff-triggers@vX.Y.Z
@@ -152,7 +149,3 @@ jobs:
         with:
           triggers: ('backend/')
 ```
-
-<!-- # Acknowledgements
-
-This Action is provided courtesty of the Forestry Suite of Applications, part of the Government of British Columbia. -->

@@ -26,7 +26,7 @@ runs:
   using: composite
   steps:
     # Checkout appropriate ref based on event type
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+    - uses: actions/checkout@v4
       with:
         repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
         ref: ${{ github.event.pull_request.head.sha || github.ref }}
@@ -56,6 +56,8 @@ runs:
         done < <(grep -o "'[^']*'" <<< "$TRIGGERS_STR" | sed "s/'//g")
 
         # Determine reference to compare against
+        # PR events: default to base repo default branch if ref omitted
+        # Non-PR events: default to HEAD^ if ref omitted
         BASE_REF="${{ inputs.ref || github.event.pull_request.base.repo.default_branch || 'HEAD^' }}"
         git remote add base "${{ github.event.pull_request.base.repo.clone_url || github.event.repository.clone_url }}"
         
