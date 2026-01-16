@@ -16,11 +16,11 @@ inputs:
   diff_branch:
     description: Branch to diff against, defaults to the default branch (deprecated, use compare_ref)
     default: ${{ github.event.pull_request.base.repo.default_branch }}
-  
+
   compare_ref:
     description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). Defaults to diff_branch for PRs, or HEAD^ for push events
     required: false
-  
+
   checkout_ref:
     description: Reference to checkout. Defaults to PR head SHA for PRs, or current ref for push events
     required: false
@@ -36,8 +36,8 @@ runs:
     # Checkout appropriate ref based on event type
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
-        repository: ${{ (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.event.pull_request.head.repo.full_name || github.repository }}
-        ref: ${{ inputs.checkout_ref || (github.event_name == 'pull_request' || github.event_name == 'pull_request_target') && github.event.pull_request.head.sha || github.ref }}
+        repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+        ref: ${{ inputs.checkout_ref || github.event.pull_request.head.sha || github.ref }}
 
     - shell: bash
       id: diff
