@@ -25,22 +25,7 @@ outputs:
 runs:
   using: composite
   steps:
-    # Detect fork PRs and set checkout/diff variables
-    - name: Vars and fork handling
-      shell: bash
-      id: vars
-      run: |
-        # Check if this is a fork PR (head repo != base repo)
-        if [ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]; then
-          # Fork PR: fetch from base remote
-          echo "remote=base" >> $GITHUB_OUTPUT
-          echo "clone_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
-        else
-          # Non-fork: fetch from origin
-          echo "remote=origin" >> $GITHUB_OUTPUT
-        fi
-
-    # Checkout the determined repository at the determined ref
+    # Checkout PR head (works for both fork and non-forks)
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       with:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -60,11 +45,9 @@ runs:
         # Build if changed files (git diff) match triggers
         TRIGGERS=${{ inputs.triggers }}
 
-        # Fetch diff_branch for comparison (clone_url only exists for forks)
-        if [ -n "${{ steps.vars.outputs.clone_url }}" ]; then
-          git remote add ${{ steps.vars.outputs.remote }} ${{ steps.vars.outputs.clone_url }}
-        fi
-        git fetch ${{ steps.vars.outputs.remote }} ${{ inputs.diff_branch }}
+        # Fetch diff_branch for comparison (treats forks and non-forks the same)
+        git remote add to_diff "${{ github.event.repository.clone_url }}"
+        git fetch to_diff ${{ inputs.diff_branch }}
 
         while read -r check; do
           for t in "${TRIGGERS[@]}"; do
@@ -76,7 +59,7 @@ runs:
                 exit 0
             fi
           done
-        done < <(git diff "${{ steps.vars.outputs.remote }}/${{ inputs.diff_branch }}" --name-only)
+        done < <(git diff "to_diff/${{ inputs.diff_branch }}" --name-only)
 
         # If at this point, no trigger has fired
         echo "Triggers have not fired"
