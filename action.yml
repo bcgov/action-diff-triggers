@@ -1,5 +1,5 @@
-name: Check Changed Files Against Triggers
-description: Do changes match triggers? Supports PR, push, workflow_dispatch, and other events. Always trigger if triggers are omitted.
+name: Diff Triggers
+description: Check if changed files match trigger paths. Returns true if any trigger matches, false otherwise. Always returns true if triggers are omitted.
 branding:
   icon: package
   color: blue
@@ -30,7 +30,7 @@ runs:
       with:
         repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
         ref: ${{ github.event.pull_request.head.sha || github.ref }}
-        # Fetch 2 commits for non-PR events to ensure HEAD^ is available (defaults to 1 for PRs)
+        # Fetch all commits for non-PR events (defaults to 1 for PRs)
         fetch-depth: ${{ github.event.pull_request && 1 || 0 }}
 
     - shell: bash
