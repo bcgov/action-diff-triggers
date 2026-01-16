@@ -63,8 +63,7 @@ jobs:
     needs: [test-true, test-false, test-omitted, test-ref-custom]
     runs-on: ubuntu-24.04
     steps:
-      - if:
-          needs.test-true.outputs.triggered != 'true' ||
+      - if: needs.test-true.outputs.triggered != 'true' ||
           needs.test-false.outputs.triggered != 'false' ||
           needs.test-omitted.outputs.triggered != 'true' ||
           needs.test-ref-custom.outputs.triggered != 'true'
