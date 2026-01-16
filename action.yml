@@ -66,8 +66,9 @@ runs:
             # Directory: prefix match (e.g., '^\./backend/')
             GREP_PATTERNS+=("^$escaped_t")
           else
-            # File: match at start or after /, at end (e.g., '(^|/)action\.yml$')
-            GREP_PATTERNS+=("(^|/)$escaped_t$")
+            # File: match at start or after any path, at end (e.g., '(^|.*/)action\.yml$')
+            # This matches 'action.yml', './action.yml', or 'path/to/action.yml' but not 'action.yml.backup'
+            GREP_PATTERNS+=("(^|.*/)$escaped_t$")
           fi
         done
         # Join patterns with |
