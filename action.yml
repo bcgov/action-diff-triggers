@@ -57,29 +57,14 @@ runs:
         git remote add to_diff "${{ github.event.pull_request.base.repo.clone_url }}"
         git fetch to_diff ${{ inputs.diff_branch }}
 
-        # Build grep pattern: directories use prefix match, files use exact match
-        GREP_PATTERNS=()
+        # Check if any changed file matches any trigger using git diff's pathspec matching
         for t in "${TRIGGERS[@]}"; do
-          # Escape special regex characters
-          escaped_t=$(printf '%s\n' "$t" | sed 's/[[\.*^$()+?{|]/\\&/g')
-          if [[ "$t" == */ ]]; then
-            # Directory: prefix match (e.g., '^\./backend/')
-            GREP_PATTERNS+=("^$escaped_t")
-          else
-            # File: match at start or after any path, at end (e.g., '(^|.*/)action\.yml$')
-            # This matches 'action.yml', './action.yml', or 'path/to/action.yml' but not 'action.yml.backup'
-            GREP_PATTERNS+=("(^|.*/)$escaped_t$")
+          if git diff "to_diff/${{ inputs.diff_branch }}" --name-only -- "$t" | grep -q .; then
+            echo "Build triggered based on git diff"
+            echo "triggered=true" >> $GITHUB_OUTPUT
+            exit 0
           fi
         done
-        # Join patterns with |
-        GREP_PATTERN=$(IFS='|'; echo "${GREP_PATTERNS[*]}")
-
-        # Check if any changed file matches any trigger
-        if git diff "to_diff/${{ inputs.diff_branch }}" --name-only | grep -qE "$GREP_PATTERN"; then
-          echo "Build triggered based on git diff"
-          echo "triggered=true" >> $GITHUB_OUTPUT
-          exit 0
-        fi
 
         # If at this point, no trigger has fired
         echo "Triggers have not fired"
