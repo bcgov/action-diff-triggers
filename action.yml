@@ -18,7 +18,7 @@ inputs:
     required: false
   
   diff_branch:
-    description: Deprecated: use base_ref instead. For backward compatibility, if provided, used as base_ref for PR events
+    description: Deprecated: use base_ref instead. Will be removed in the next major release. For backward compatibility, if provided, used as base_ref
     required: false
 
   head_ref:

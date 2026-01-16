@@ -41,11 +41,35 @@ Check triggers against a diff of changed files. Supports PR events (including fo
     # - PR events: defaults to PR head SHA
     # - Other events: defaults to current ref (github.ref)
     head_ref: HEAD  # or commit SHA, branch, tag
+
+    ### Deprecated
+    # diff_branch: main  # Deprecated: use base_ref instead. Will be removed in next major release.
 ```
 
 # Output
 
 Returns `triggered: true` if triggers fire, `triggered: false` otherwise.
+
+## Deprecated Inputs
+
+### `diff_branch` (deprecated)
+
+The `diff_branch` input is deprecated and will be removed in the next major release. Use `base_ref` instead.
+
+**Migration:**
+```yaml
+# Old (deprecated)
+- uses: bcgov-nr/action-diff-triggers@vX.Y.Z
+  with:
+    triggers: ('backend/')
+    diff_branch: develop
+
+# New
+- uses: bcgov-nr/action-diff-triggers@vX.Y.Z
+  with:
+    triggers: ('backend/')
+    base_ref: develop
+```
 
 # Examples
 
