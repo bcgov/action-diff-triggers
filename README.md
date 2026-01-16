@@ -1,10 +1,7 @@
 
 ## ⚠️ BREAKING CHANGES in v1.0
 
-- **`diff_branch` input removed**: Replaced with `ref` input
-  - `diff_branch` only supported branch names
-  - `ref` supports branches, commit SHAs, tags, and relative refs (e.g., `HEAD^`)
-  - **Migration**: Replace `diff_branch: main` with `ref: main`
+- **`diff_branch` replaced with `ref`, which supports branches, commit SHAs, tags, and relative refs (e.g., `HEAD^`)**
 
 ---
 
