@@ -61,10 +61,9 @@ runs:
           COMPARE_REF="${{ inputs.ref }}"
         elif [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
           # PR event: use base repo default branch
-          COMPARE_REF="${{ github.event.pull_request.base.repo.default_branch }}"
-          git remote add to_diff "${{ github.event.pull_request.base.repo.clone_url }}"
-          git fetch to_diff "$COMPARE_REF"
-          COMPARE_REF="to_diff/$COMPARE_REF"
+          git remote add base "${{ github.event.pull_request.base.repo.clone_url }}"
+          git fetch base "${{ github.event.pull_request.base.repo.default_branch }}"
+          COMPARE_REF="base/${{ github.event.pull_request.base.repo.default_branch }}"
         else
           # Non-PR event: default to HEAD^ (previous commit)
           COMPARE_REF="HEAD^"
