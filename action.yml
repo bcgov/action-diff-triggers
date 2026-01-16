@@ -38,9 +38,8 @@ runs:
       with:
         repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
         ref: ${{ inputs.head_ref || github.event.pull_request.head.sha || github.ref }}
-        # Fetch at least 2 commits to ensure HEAD^ is available for push/workflow_dispatch events
-        # and when base_ref: HEAD^ is used
-        fetch-depth: 2
+        # Fetch 2 commits for non-PR events to ensure HEAD^ is available (defaults to 1 for PRs)
+        fetch-depth: ${{ github.event.pull_request && 1 || 0 }}
 
     - shell: bash
       id: diff
