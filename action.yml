@@ -1,5 +1,5 @@
-name: Conditional Container Builder with Fallback
-description: Build if trigger conditions are met, else use fallback image
+name: Check Changed Files Against Triggers
+description: Do changes match triggers?  Always trigger if triggers are omitted.
 branding:
   icon: package
   color: blue
@@ -15,7 +15,7 @@ inputs:
   ### Usually a bad idea / not recommended
   diff_branch:
     description: Branch to diff against, defaults to the default branch
-    default: ${{ github.event.repository.default_branch }}
+    default: ${{ github.event.pull_request.base.repo.default_branch }}
 
 outputs:
   triggered:
@@ -25,12 +25,18 @@ outputs:
 runs:
   using: composite
   steps:
-    # Check if a build is required (steps.build.outputs.triggered=true|false)
+    # Checkout PR head (works for both fork and non-fork PRs; requires pull_request or pull_request_target)
     - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-    - name: Diff for changes
-      shell: bash
+      with:
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - shell: bash
       id: diff
       run: |
+        # Diff for changes
+        set -e
+
         # Always fire if triggers are omitted
         if [ -z "${{ inputs.triggers }}" ]; then
           echo "Always fire when triggers are omitted!"
@@ -40,7 +46,11 @@ runs:
 
         # Build if changed files (git diff) match triggers
         TRIGGERS=${{ inputs.triggers }}
-        git fetch origin ${{ inputs.diff_branch }}
+
+        # Add remote and fetch branch (treats forks and non-forks the same)
+        git remote add to_diff "${{ github.event.pull_request.base.repo.clone_url }}"
+        git fetch to_diff ${{ inputs.diff_branch }}
+
         while read -r check; do
           for t in "${TRIGGERS[@]}"; do
             if [[ "${check}" =~ "${t}" ]]; then
@@ -51,7 +61,7 @@ runs:
                 exit 0
             fi
           done
-        done < <(git diff origin/${{ inputs.diff_branch }} --name-only)
+        done < <(git diff "to_diff/${{ inputs.diff_branch }}" --name-only)
 
         # If at this point, no trigger has fired
         echo "Triggers have not fired"
