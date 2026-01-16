@@ -37,15 +37,15 @@ runs:
           # Fork PR: checkout fork repo, compare against base repo
           echo "repository=${{ github.event.pull_request.head.repo.full_name }}" >> $GITHUB_OUTPUT
           echo "ref=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
-          echo "is_fork=true" >> $GITHUB_OUTPUT
-          echo "base_repo_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
           echo "diff_ref=base/${{ inputs.diff_branch }}" >> $GITHUB_OUTPUT
+          echo "fetch_remote=base" >> $GITHUB_OUTPUT
+          echo "fetch_remote_url=${{ github.event.repository.clone_url }}" >> $GITHUB_OUTPUT
         else
           # Non-fork: checkout base repo
           echo "repository=${{ github.repository }}" >> $GITHUB_OUTPUT
           echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
-          echo "is_fork=false" >> $GITHUB_OUTPUT
           echo "diff_ref=origin/${{ inputs.diff_branch }}" >> $GITHUB_OUTPUT
+          echo "fetch_remote=origin" >> $GITHUB_OUTPUT
         fi
 
     # Checkout the determined repository at the determined ref
@@ -68,13 +68,11 @@ runs:
         # Build if changed files (git diff) match triggers
         TRIGGERS=${{ inputs.triggers }}
 
-        # Fetch base repo's diff_branch for comparison (DIFF_REF determined in first step)
-        if [ "${{ steps.fork.outputs.is_fork }}" = "true" ]; then
-          git remote set-url base ${{ steps.fork.outputs.base_repo_url }} 2>/dev/null || git remote add base ${{ steps.fork.outputs.base_repo_url }}
-          git fetch base ${{ inputs.diff_branch }}
-        else
-          git fetch origin ${{ inputs.diff_branch }}
+        # Fetch diff_branch for comparison (remote and ref determined in first step)
+        if [ -n "${{ steps.fork.outputs.fetch_remote_url }}" ]; then
+          git remote set-url ${{ steps.fork.outputs.fetch_remote }} ${{ steps.fork.outputs.fetch_remote_url }} 2>/dev/null || git remote add ${{ steps.fork.outputs.fetch_remote }} ${{ steps.fork.outputs.fetch_remote_url }}
         fi
+        git fetch ${{ steps.fork.outputs.fetch_remote }} ${{ inputs.diff_branch }}
         DIFF_REF="${{ steps.fork.outputs.diff_ref }}"
 
         while read -r check; do
