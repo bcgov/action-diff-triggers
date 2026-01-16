@@ -1,5 +1,5 @@
 name: Check Changed Files Against Triggers
-description: Do changes match triggers? Supports PR and push events. Always trigger if triggers are omitted.
+description: Do changes match triggers? Supports PR, push, workflow_dispatch, and other events. Always trigger if triggers are omitted.
 branding:
   icon: package
   color: blue

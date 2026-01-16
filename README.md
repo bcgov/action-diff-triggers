@@ -9,7 +9,7 @@
 
 # Diff File Changes with Triggers
 
-Check triggers against a diff of changed files. Supports PR events (including fork PRs) and push events. For Actions with trigger parameters, like builders and deployers.
+Check triggers against a diff of changed files. Supports PR events (including fork PRs), push events, workflow_dispatch, and other GitHub Actions events. For Actions with trigger parameters, like builders and deployers.
 
 ## Features
 
@@ -32,10 +32,14 @@ Check triggers against a diff of changed files. Supports PR events (including fo
 
     ### Optional
 
-    # Base reference to compare against (defaults to base repo default branch for PRs, HEAD^ for push events)
+    # Base reference to compare against
+    # - PR events: defaults to base repo default branch
+    # - Other events (push, workflow_dispatch, etc.): defaults to HEAD^
     base_ref: main  # or 'HEAD^', commit SHA, branch, tag
 
-    # Head reference to checkout (defaults to PR head SHA for PRs, current ref for push events)
+    # Head reference to checkout
+    # - PR events: defaults to PR head SHA
+    # - Other events: defaults to current ref (github.ref)
     head_ref: HEAD  # or commit SHA, branch, tag
 ```
 
@@ -100,6 +104,25 @@ jobs:
         with:
           triggers: ('backend/' 'frontend/')
           # base_ref defaults to HEAD^ for push events
+```
+
+## Workflow Dispatch Event
+
+Works with manual triggers and other events. Defaults to comparing HEAD vs HEAD^:
+
+```yaml
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: bcgov-nr/action-diff-triggers@vX.Y.Z
+        with:
+          triggers: ('backend/')
+          # base_ref defaults to HEAD^ for non-PR events
+          # Can override: base_ref: main
 ```
 
 ## Compare Against Specific Commit
