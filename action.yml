@@ -41,11 +41,9 @@ runs:
 
         # Always fire if triggers are omitted
         if [ -z "${{ inputs.triggers }}" ]; then
-          echo ""
-          echo "╔══════════════════════════════════════════════════════════════╗"
-          echo "║  DIFF TRIGGERS: TRIGGERED (always, triggers omitted)       ║"
-          echo "╚══════════════════════════════════════════════════════════════╝"
-          echo ""
+          echo "::group::Diff Triggers — ✅ TRIGGERED | ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
+          echo "  Triggers: (omitted — always fires)"
+          echo "::endgroup::"
           echo "::notice::Diff Triggers fired! ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
           echo "triggered=true" >> $GITHUB_OUTPUT
 
@@ -87,18 +85,9 @@ runs:
           COMPARE_REF="base/$BASE_REF"
         fi
 
-        # Log configuration
-        echo ""
-        echo "::group::Diff Triggers — Configuration"
-        echo "  Triggers:     $TRIGGERS_STR"
-        echo "  Comparing to: $COMPARE_REF (ref: $BASE_REF)"
-        echo "  Event:        ${{ github.event_name }}"
-        echo "::endgroup::"
-
-        # Check ALL triggers and collect results for comprehensive reporting
+        # Check all triggers and collect results
         TRIGGERED=false
         MATCHED_TRIGGERS=()
-        ALL_MATCHED_FILES=""
         DETAILS_LOG=""
         SUMMARY_FILES_MD=""
 
@@ -107,31 +96,26 @@ runs:
           if [[ -n "$DIFF_OUTPUT" ]]; then
             TRIGGERED=true
             MATCHED_TRIGGERS+=("$t")
-            ALL_MATCHED_FILES+="$DIFF_OUTPUT"$'\n'
-            DETAILS_LOG+="  ✔ Trigger '$t' — MATCHED"$'\n'
+            DETAILS_LOG+="  ✔ '$t'"$'\n'
             while IFS= read -r f; do
               DETAILS_LOG+="      $f"$'\n'
               SUMMARY_FILES_MD+="| \`$f\` | \`$t\` |"$'\n'
             done <<< "$DIFF_OUTPUT"
           else
-            DETAILS_LOG+="  ✘ Trigger '$t' — no matches"$'\n'
+            DETAILS_LOG+="  ✘ '$t'"$'\n'
           fi
         done
 
-        # Display results in a collapsible group
-        echo "::group::Diff Triggers — Trigger Details"
-        echo "$DETAILS_LOG"
-        echo "::endgroup::"
-
-        # Prominent banner in the log
-        echo ""
+        # Single collapsible group — result in the title, details inside
         if [[ "$TRIGGERED" == "true" ]]; then
-          echo "╔══════════════════════════════════════════════════════════════╗"
-          echo "║  DIFF TRIGGERS: TRIGGERED (true)                           ║"
-          echo "╚══════════════════════════════════════════════════════════════╝"
           MATCHED_LIST=$(IFS=', '; echo "${MATCHED_TRIGGERS[*]}")
-          echo "  Matching triggers: $MATCHED_LIST"
+          echo "::group::Diff Triggers — ✅ TRIGGERED | ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
+          echo "  Triggers:     $TRIGGERS_STR"
+          echo "  Comparing to: $COMPARE_REF"
+          echo "  Matched:      $MATCHED_LIST"
           echo ""
+          echo "$DETAILS_LOG"
+          echo "::endgroup::"
           echo "::notice::Diff Triggers fired! ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
           echo "triggered=true" >> $GITHUB_OUTPUT
 
@@ -154,10 +138,12 @@ runs:
             echo "</details>"
           } >> $GITHUB_STEP_SUMMARY
         else
-          echo "╔══════════════════════════════════════════════════════════════╗"
-          echo "║  DIFF TRIGGERS: NOT TRIGGERED (false)                      ║"
-          echo "╚══════════════════════════════════════════════════════════════╝"
+          echo "::group::Diff Triggers — ⊘ NOT TRIGGERED | ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
+          echo "  Triggers:     $TRIGGERS_STR"
+          echo "  Comparing to: $COMPARE_REF"
           echo ""
+          echo "$DETAILS_LOG"
+          echo "::endgroup::"
           echo "::notice::Diff Triggers not fired. ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
           echo "triggered=false" >> $GITHUB_OUTPUT
 
