@@ -12,6 +12,10 @@ inputs:
   triggers:
     description: Paths used to trigger an event; e.g. ('./backend/' './frontend/); always trigger if omitted
 
+  trigger_name:
+    description: Name of the consuming action (e.g. 'bcgov/action-name') for identification in logs
+    required: false
+
   ### Usually a bad idea / not recommended
   ref:
     description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). Defaults to base repo default branch for PRs, or HEAD^ for non-PR events. Local refs (HEAD^, HEAD~2) work for non-PR events; remote refs (branches, tags, SHAs) work for all events
@@ -72,9 +76,18 @@ runs:
 
         # Check if any changed file matches any trigger using git diff's pathspec matching
         for t in "${TRIGGERS[@]}"; do
-          if git diff "$COMPARE_REF" --name-only -- "$t" | grep -q .; then
+          # Capture diff output
+          DIFF_OUTPUT=$(git diff "$COMPARE_REF" --name-only -- "$t")
+          if [[ -n "$DIFF_OUTPUT" ]]; then
             echo "Build triggered based on git diff"
             echo "triggered=true" >> $GITHUB_OUTPUT
+
+            # Write to GITHUB_STEP_SUMMARY
+            echo "consuming action: ${{ inputs.trigger_name || 'Unknown' }}" >> $GITHUB_STEP_SUMMARY
+            echo "triggers: $TRIGGERS_STR" >> $GITHUB_STEP_SUMMARY
+            echo "results: files changed" >> $GITHUB_STEP_SUMMARY
+            echo "$DIFF_OUTPUT" >> $GITHUB_STEP_SUMMARY
+
             exit 0
           fi
         done
