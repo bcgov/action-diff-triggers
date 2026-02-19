@@ -50,10 +50,9 @@ Returns `triggered: true` if triggers fire, `triggered: false` otherwise.
 
 The action provides detailed logging directly in the step output for easy debugging and visibility:
 
-- **Banner** — A prominent box clearly showing `TRIGGERED (true)` or `NOT TRIGGERED (false)`
-- **Collapsible groups** — Configuration and per-trigger details in `::group::` blocks
-- **Annotations** — `::notice::` annotations that appear inline in the log and in the workflow summary
-- **Step summary** — A markdown table in the job summary with workflow/job context, triggers, comparison ref, and matched files
+- **Banner** — A collapsible group clearly showing `✅ TRIGGERED` or `⊘ NOT TRIGGERED` with repo/workflow/job context
+- **Collapsible details** — Trigger configuration and per-trigger match results inside the group
+- **Annotations** — `::notice::` annotations that appear in the workflow summary and annotations tab
 
 # Examples
 

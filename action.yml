@@ -46,18 +46,6 @@ runs:
           echo "::endgroup::"
           echo "::notice::Diff Triggers fired! ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
           echo "triggered=true" >> $GITHUB_OUTPUT
-
-          # Step summary
-          {
-            echo "### ✅ Diff Triggers — TRIGGERED"
-            echo ""
-            echo "| Detail | Value |"
-            echo "|--------|-------|"
-            echo "| **Workflow / Job** | \`${{ github.workflow }}\` / \`${{ github.job }}\` |"
-            echo "| **Triggers** | _(omitted — always fires)_ |"
-            echo "| **Result** | \`triggered=true\` |"
-          } >> $GITHUB_STEP_SUMMARY
-
           exit 0
         fi
 
@@ -89,7 +77,6 @@ runs:
         TRIGGERED=false
         MATCHED_TRIGGERS=()
         DETAILS_LOG=""
-        SUMMARY_FILES_MD=""
 
         for t in "${TRIGGERS[@]}"; do
           DIFF_OUTPUT=$(git diff "$COMPARE_REF" --name-only -- "$t")
@@ -99,7 +86,6 @@ runs:
             DETAILS_LOG+="  ✔ '$t'"$'\n'
             while IFS= read -r f; do
               DETAILS_LOG+="      $f"$'\n'
-              SUMMARY_FILES_MD+="| \`$f\` | \`$t\` |"$'\n'
             done <<< "$DIFF_OUTPUT"
           else
             DETAILS_LOG+="  ✘ '$t'"$'\n'
@@ -118,25 +104,6 @@ runs:
           echo "::endgroup::"
           echo "::notice::Diff Triggers fired! ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
           echo "triggered=true" >> $GITHUB_OUTPUT
-
-          # Step summary
-          {
-            echo "### ✅ Diff Triggers — TRIGGERED"
-            echo ""
-            echo "| Detail | Value |"
-            echo "|--------|-------|"
-            echo "| **Workflow / Job** | \`${{ github.workflow }}\` / \`${{ github.job }}\` |"
-            echo "| **Triggers** | \`$TRIGGERS_STR\` |"
-            echo "| **Comparing to** | \`$COMPARE_REF\` |"
-            echo "| **Result** | \`triggered=true\` |"
-            echo ""
-            echo "<details><summary>Changed files matching triggers</summary>"
-            echo ""
-            echo "| File | Trigger |"
-            echo "|------|---------|"
-            echo "$SUMMARY_FILES_MD"
-            echo "</details>"
-          } >> $GITHUB_STEP_SUMMARY
         else
           echo "::group::Diff Triggers — ⊘ NOT TRIGGERED | ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
           echo "  Triggers:     $TRIGGERS_STR"
@@ -146,16 +113,4 @@ runs:
           echo "::endgroup::"
           echo "::notice::Diff Triggers not fired. ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
           echo "triggered=false" >> $GITHUB_OUTPUT
-
-          # Step summary
-          {
-            echo "### ⊘ Diff Triggers — NOT TRIGGERED"
-            echo ""
-            echo "| Detail | Value |"
-            echo "|--------|-------|"
-            echo "| **Workflow / Job** | \`${{ github.workflow }}\` / \`${{ github.job }}\` |"
-            echo "| **Triggers** | \`$TRIGGERS_STR\` |"
-            echo "| **Comparing to** | \`$COMPARE_REF\` |"
-            echo "| **Result** | \`triggered=false\` |"
-          } >> $GITHUB_STEP_SUMMARY
         fi
