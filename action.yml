@@ -12,9 +12,7 @@ inputs:
   triggers:
     description: Paths used to trigger an event; e.g. ('./backend/' './frontend/); always trigger if omitted
 
-  trigger_name:
-    description: Name of the consuming action (e.g. 'bcgov/action-name') for identification in logs
-    required: false
+
 
   ### Usually a bad idea / not recommended
   ref:
@@ -83,7 +81,7 @@ runs:
             echo "triggered=true" >> $GITHUB_OUTPUT
 
             # Write to GITHUB_STEP_SUMMARY
-            echo "consuming action: ${{ inputs.trigger_name || 'Unknown' }}" >> $GITHUB_STEP_SUMMARY
+            echo "consuming action: ${{ github.workflow }} / ${{ github.job }}" >> $GITHUB_STEP_SUMMARY
             echo "triggers: $TRIGGERS_STR" >> $GITHUB_STEP_SUMMARY
             echo "results: files changed" >> $GITHUB_STEP_SUMMARY
             echo "$DIFF_OUTPUT" >> $GITHUB_STEP_SUMMARY
