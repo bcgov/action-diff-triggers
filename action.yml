@@ -45,7 +45,7 @@ runs:
           echo "::group::Diff Triggers — ✅ TRIGGERED | ${{ github.repository }} $CALLER_CONTEXT"
           echo "  Triggers: (omitted — always fires)"
           echo "::endgroup::"
-          echo "::notice::Diff Triggers fired! (${{ github.repository }})"
+          echo "::notice::Diff Triggers fired. (${{ github.repository }})"
           echo "triggered=true" >> $GITHUB_OUTPUT
           exit 0
         fi
@@ -115,7 +115,7 @@ runs:
           echo ""
           echo "$DETAILS_LOG"
           echo "::endgroup::"
-          echo "::notice::Diff Triggers fired! (${{ github.repository }})"
+          echo "::notice::Diff Triggers fired. (${{ github.repository }})"
           echo "triggered=true" >> $GITHUB_OUTPUT
         else
           echo "::group::Diff Triggers — ⊘ NOT TRIGGERED | ${{ github.repository }} $CALLER_CONTEXT"
