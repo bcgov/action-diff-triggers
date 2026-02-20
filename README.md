@@ -50,7 +50,7 @@ Returns `triggered: true` if triggers fire, `triggered: false` otherwise.
 
 The action provides detailed logging directly in the step output for easy debugging and visibility:
 
-- **Banner** — A collapsible group clearly showing `✅ TRIGGERED` or `⊘ NOT TRIGGERED`, with supplementary caller context in brackets: `[workflow / job]`
+- **Banner** — A collapsible group clearly showing triggered/not-triggered status, with supplementary caller context in brackets: `[workflow / job]`
 - **Collapsible details** — Trigger configuration and per-trigger match results inside the group
 - **Ref source** — Shows whether comparison ref came from explicit input (`input`) or default behavior (`default`)
 - **Annotations** — `::notice::` annotations that appear in the workflow summary and annotations tab (e.g., `::notice title=Diff Triggers::ℹ️ Diff Triggers not fired. (owner/repo)`)
