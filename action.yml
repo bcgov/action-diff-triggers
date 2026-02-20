@@ -44,7 +44,7 @@ runs:
           echo "::group::Diff Triggers — ✅ TRIGGERED | ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
           echo "  Triggers: (omitted — always fires)"
           echo "::endgroup::"
-          echo "::notice::Diff Triggers fired! ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
+          echo "::notice::Diff Triggers fired! ${{ github.repository }}"
           echo "triggered=true" >> $GITHUB_OUTPUT
           exit 0
         fi
@@ -102,7 +102,7 @@ runs:
           echo ""
           echo "$DETAILS_LOG"
           echo "::endgroup::"
-          echo "::notice::Diff Triggers fired! ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
+          echo "::notice::Diff Triggers fired! ${{ github.repository }}"
           echo "triggered=true" >> $GITHUB_OUTPUT
         else
           echo "::group::Diff Triggers — ⊘ NOT TRIGGERED | ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
@@ -111,6 +111,6 @@ runs:
           echo ""
           echo "$DETAILS_LOG"
           echo "::endgroup::"
-          echo "::notice::Diff Triggers not fired. ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
+          echo "::notice::Diff Triggers not fired. ${{ github.repository }}"
           echo "triggered=false" >> $GITHUB_OUTPUT
         fi
