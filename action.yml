@@ -38,13 +38,14 @@ runs:
       run: |
         # Diff for changes
         set -e
+        CALLER_CONTEXT="[${{ github.workflow }} / ${{ github.job }}]"
 
         # Always fire if triggers are omitted
         if [ -z "${{ inputs.triggers }}" ]; then
-          echo "::group::Diff Triggers — ✅ TRIGGERED | ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
+          echo "::group::Diff Triggers — ✅ TRIGGERED | ${{ github.repository }} $CALLER_CONTEXT"
           echo "  Triggers: (omitted — always fires)"
           echo "::endgroup::"
-          echo "::notice::Diff Triggers fired! ${{ github.repository }}"
+          echo "::notice::Diff Triggers fired! ${{ github.repository }} $CALLER_CONTEXT"
           echo "triggered=true" >> $GITHUB_OUTPUT
           exit 0
         fi
@@ -62,7 +63,18 @@ runs:
         # PR events: default to base repo default branch if ref omitted
         # Non-PR events: default to HEAD^ if ref omitted
         BASE_REF="${{ inputs.ref || github.event.pull_request.base.repo.default_branch || 'HEAD^' }}"
-        git remote add base "${{ github.event.pull_request.base.repo.clone_url || github.event.repository.clone_url }}"
+        if [ -n "${{ inputs.ref }}" ]; then
+          REF_SOURCE="input"
+        else
+          REF_SOURCE="default"
+        fi
+
+        BASE_REMOTE_URL="${{ github.event.pull_request.base.repo.clone_url || github.event.repository.clone_url }}"
+        if git remote get-url base >/dev/null 2>&1; then
+          git remote set-url base "$BASE_REMOTE_URL"
+        else
+          git remote add base "$BASE_REMOTE_URL"
+        fi
         
         # If BASE_REF starts with HEAD, it's a local ref - use it directly
         # Otherwise, fetch from remote and prefix
@@ -95,22 +107,24 @@ runs:
         # Single collapsible group — result in the title, details inside
         if [[ "$TRIGGERED" == "true" ]]; then
           MATCHED_LIST=$(IFS=', '; echo "${MATCHED_TRIGGERS[*]}")
-          echo "::group::Diff Triggers — ✅ TRIGGERED | ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
+          echo "::group::Diff Triggers — ✅ TRIGGERED | ${{ github.repository }} $CALLER_CONTEXT"
           echo "  Triggers:     $TRIGGERS_STR"
           echo "  Comparing to: $COMPARE_REF"
+          echo "  Ref source:   $REF_SOURCE"
           echo "  Matched:      $MATCHED_LIST"
           echo ""
           echo "$DETAILS_LOG"
           echo "::endgroup::"
-          echo "::notice::Diff Triggers fired! ${{ github.repository }}"
+          echo "::notice::Diff Triggers fired! ${{ github.repository }} $CALLER_CONTEXT"
           echo "triggered=true" >> $GITHUB_OUTPUT
         else
-          echo "::group::Diff Triggers — ⊘ NOT TRIGGERED | ${{ github.repository }} — ${{ github.workflow }} / ${{ github.job }}"
+          echo "::group::Diff Triggers — ⊘ NOT TRIGGERED | ${{ github.repository }} $CALLER_CONTEXT"
           echo "  Triggers:     $TRIGGERS_STR"
           echo "  Comparing to: $COMPARE_REF"
+          echo "  Ref source:   $REF_SOURCE"
           echo ""
           echo "$DETAILS_LOG"
           echo "::endgroup::"
-          echo "::notice::Diff Triggers not fired. ${{ github.repository }}"
+          echo "::notice::Diff Triggers not fired. ${{ github.repository }} $CALLER_CONTEXT"
           echo "triggered=false" >> $GITHUB_OUTPUT
         fi
