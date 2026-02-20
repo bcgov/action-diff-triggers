@@ -53,7 +53,7 @@ The action provides detailed logging directly in the step output for easy debugg
 - **Banner** — A collapsible group clearly showing `✅ TRIGGERED` or `⊘ NOT TRIGGERED`, with supplementary caller context in brackets: `[workflow / job]`
 - **Collapsible details** — Trigger configuration and per-trigger match results inside the group
 - **Ref source** — Shows whether comparison ref came from explicit input (`input`) or default behavior (`default`)
-- **Annotations** — `::notice::` annotations that appear in the workflow summary and annotations tab (e.g., `::notice title=Diff Triggers::⊘ Diff Triggers not fired. (owner/repo)`)
+- **Annotations** — `::notice::` annotations that appear in the workflow summary and annotations tab (e.g., `::notice title=Diff Triggers::ℹ️ Diff Triggers not fired. (owner/repo)`)
 
 # Examples
 

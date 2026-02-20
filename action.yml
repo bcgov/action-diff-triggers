@@ -125,6 +125,6 @@ runs:
           echo ""
           echo "$DETAILS_LOG"
           echo "::endgroup::"
-          echo "::notice title=Diff Triggers::⊘ Diff Triggers not fired. (${{ github.repository }})"
+          echo "::notice title=Diff Triggers::ℹ️ Diff Triggers not fired. (${{ github.repository }})"
           echo "triggered=false" >> $GITHUB_OUTPUT
         fi
