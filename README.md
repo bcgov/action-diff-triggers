@@ -1,7 +1,9 @@
 
-## ⚠️ BREAKING CHANGES in v1.0
+## ⚠️ Historical breaking change (v1.0)
 
 - **`diff_branch` replaced with `ref`, which supports branches, commit SHAs, tags, and relative refs**
+
+This note is historical context for the v1.0 release and does not imply that current changes are breaking.
 
 ---
 
