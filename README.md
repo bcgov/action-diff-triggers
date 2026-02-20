@@ -21,7 +21,7 @@ Check triggers against a diff of changed files. Supports PR events (including fo
 - ✅ **Flexible Ref Comparison**: Compare against any ref (branch, commit SHA, HEAD^, etc.)
 - ✅ **Smart Path Matching**: Uses git pathspec matching for accurate trigger detection
 - ✅ **Space Handling**: Properly handles trigger paths containing spaces
-- ✅ **Visible Logging**: Prominent banners, collapsible details, and annotations in the step log
+- ✅ **Visible Logging**: Prominent banners and collapsible details in step logs, plus notice annotations in workflow summary and annotations views
 
 # Usage
 
