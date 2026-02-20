@@ -17,6 +17,11 @@ inputs:
     description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). Defaults to base repo default branch for PRs, or HEAD^ for non-PR events. Local refs (HEAD^, HEAD~2) work for non-PR events; remote refs (branches, tags, SHAs) work for all events
     required: false
 
+  annotations:
+    description: Emit workflow summary annotations (`::notice::`) for fired/not fired results. Set to false to suppress annotations
+    required: false
+    default: 'true'
+
 outputs:
   triggered:
     description: Boolean result of triggers
@@ -39,13 +44,17 @@ runs:
         # Diff for changes
         set -e
         CALLER_CONTEXT="[${{ github.workflow }} / ${{ github.job }}]"
+        ANNOTATIONS_ENABLED="${{ inputs.annotations }}"
+        ANNOTATIONS_ENABLED="$(echo "$ANNOTATIONS_ENABLED" | tr '[:upper:]' '[:lower:]')"
 
         # Always fire if triggers are omitted
         if [ -z "${{ inputs.triggers }}" ]; then
           echo "::group::Diff Triggers — ✅ TRIGGERED | ${{ github.repository }} $CALLER_CONTEXT"
           echo "  Triggers: (omitted — always fires)"
           echo "::endgroup::"
-          echo "::notice title=Diff Triggers::✅ Diff Triggers fired. (${{ github.repository }})"
+          if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
+            echo "::notice title=Diff Triggers::✅ Diff Triggers fired. (${{ github.repository }})"
+          fi
           echo "triggered=true" >> $GITHUB_OUTPUT
           exit 0
         fi
@@ -115,7 +124,9 @@ runs:
           echo ""
           echo "$DETAILS_LOG"
           echo "::endgroup::"
-          echo "::notice title=Diff Triggers::✅ Diff Triggers fired. (${{ github.repository }})"
+          if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
+            echo "::notice title=Diff Triggers::✅ Diff Triggers fired. (${{ github.repository }})"
+          fi
           echo "triggered=true" >> $GITHUB_OUTPUT
         else
           echo "::group::Diff Triggers — ⊘ NOT TRIGGERED | ${{ github.repository }} $CALLER_CONTEXT"
@@ -125,6 +136,8 @@ runs:
           echo ""
           echo "$DETAILS_LOG"
           echo "::endgroup::"
-          echo "::notice title=Diff Triggers::ℹ️ Diff Triggers not fired. (${{ github.repository }})"
+          if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
+            echo "::notice title=Diff Triggers::ℹ️ Diff Triggers not fired. (${{ github.repository }})"
+          fi
           echo "triggered=false" >> $GITHUB_OUTPUT
         fi

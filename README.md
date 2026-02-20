@@ -40,6 +40,10 @@ Check triggers against a diff of changed files. Supports PR events (including fo
     # - PR events: defaults to base repo default branch
     # - Other events (push, workflow_dispatch, etc.): defaults to HEAD^
     ref: main  # Branch, commit SHA, tag, or local ref (HEAD^, HEAD~2). Local refs work for non-PR events only
+
+    # Emit workflow summary/annotations notices (default: true)
+    # Set false to suppress notices while keeping step logs
+    annotations: true
 ```
 
 # Output
@@ -53,7 +57,7 @@ The action provides detailed logging directly in the step output for easy debugg
 - **Banner** — A collapsible group clearly showing triggered/not-triggered status, with supplementary caller context in brackets: `[workflow / job]`
 - **Collapsible details** — Trigger configuration and per-trigger match results inside the group
 - **Ref source** — Shows whether comparison ref came from explicit input (`input`) or default behavior (`default`)
-- **Annotations** — `::notice::` annotations that appear in the workflow summary and annotations tab (e.g., `::notice title=Diff Triggers::ℹ️ Diff Triggers not fired. (owner/repo)`)
+- **Annotations** — Optional `::notice::` annotations (enabled by default; `annotations: true`) that appear in the workflow summary and annotations tab (e.g., `::notice title=Diff Triggers::ℹ️ Diff Triggers not fired. (owner/repo)`)
 
 # Examples
 
