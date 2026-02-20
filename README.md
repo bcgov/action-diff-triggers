@@ -21,6 +21,7 @@ Check triggers against a diff of changed files. Supports PR events (including fo
 - ✅ **Flexible Ref Comparison**: Compare against any ref (branch, commit SHA, HEAD^, etc.)
 - ✅ **Smart Path Matching**: Uses git pathspec matching for accurate trigger detection
 - ✅ **Space Handling**: Properly handles trigger paths containing spaces
+- ✅ **Visible Logging**: Prominent banners and collapsible details in step logs, plus notice annotations in workflow summary and annotations views
 
 # Usage
 
@@ -39,11 +40,24 @@ Check triggers against a diff of changed files. Supports PR events (including fo
     # - PR events: defaults to base repo default branch
     # - Other events (push, workflow_dispatch, etc.): defaults to HEAD^
     ref: main  # Branch, commit SHA, tag, or local ref (HEAD^, HEAD~2). Local refs work for non-PR events only
+
+    # Emit workflow summary/annotations notices (default: true)
+    # Set false to suppress notices while keeping step logs
+    annotations: true
 ```
 
 # Output
 
 Returns `triggered: true` if triggers fire, `triggered: false` otherwise.
+
+# Logging & Visibility
+
+The action provides detailed logging directly in the step output for easy debugging and visibility:
+
+- **Banner** — A collapsible group clearly showing triggered/not-triggered status, with supplementary caller context in brackets: `[workflow / job]`
+- **Collapsible details** — Trigger configuration and per-trigger match results inside the group
+- **Ref source** — Shows whether comparison ref came from explicit input (`input`) or default behavior (`default`)
+- **Annotations** — Optional `::notice::` annotations (enabled by default; `annotations: true`) that appear in the workflow summary and annotations tab (e.g., `::notice title=Diff Triggers::ℹ️ Diff Triggers not fired. (owner/repo)`)
 
 # Examples
 
