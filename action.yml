@@ -16,7 +16,7 @@ inputs:
   ref:
     description: Reference to compare against (e.g., 'main', 'HEAD^', commit SHA). Defaults to base repo default branch for PRs, or HEAD^ for non-PR events. Local refs (HEAD^, HEAD~2) work for non-PR events; remote refs (branches, tags, SHAs) work for all events
     required: false
-  token:
+  github_token:
     description: Specify token (GH or PAT), instead of inheriting one from the calling workflow
     default: ${{ github.token }}
 
@@ -36,7 +36,7 @@ runs:
     # Checkout appropriate ref based on event type
     - uses: actions/checkout@v6
       with:
-        token: ${{ inputs.token }}
+        token: ${{ inputs.github_token }}
         repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
         ref: ${{ github.event.pull_request.head.sha || github.ref }}
         # Fetch all commits for non-PR events (defaults to 1 for PRs)
