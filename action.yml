@@ -57,7 +57,7 @@ runs:
           echo "  Triggers: (omitted — always fires)"
           echo "::endgroup::"
           if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
-            echo "::notice title=Diff Triggers [${{ github.job }}]::✅ Omitted"
+            echo "::notice title=Diff Triggers [${{ github.job }}]::✅ Fired (triggers omitted — always fires)"
           fi
           echo "triggered=true" >> $GITHUB_OUTPUT
           exit 0
@@ -66,6 +66,10 @@ runs:
         # Build if changed files (git diff) match triggers
         # Parse triggers input into array (properly handles quoted strings with spaces)
         TRIGGERS_STR="${{ inputs.triggers }}"
+        # Escape %, \n, \r for GitHub Actions workflow command encoding
+        ESCAPED_TRIGGERS="${TRIGGERS_STR//%/%25}"
+        ESCAPED_TRIGGERS="${ESCAPED_TRIGGERS//$'\n'/%0A}"
+        ESCAPED_TRIGGERS="${ESCAPED_TRIGGERS//$'\r'/%0D}"
         # Extract all quoted strings preserving spaces within quotes
         TRIGGERS=()
         while IFS= read -r line; do
@@ -129,7 +133,7 @@ runs:
           echo "$DETAILS_LOG"
           echo "::endgroup::"
           if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
-            echo "::notice title=Diff Triggers [${{ github.job }}]::✅ Fired. Triggers: $TRIGGERS_STR"
+            echo "::notice title=Diff Triggers [${{ github.job }}]::✅ Fired. Triggers: $ESCAPED_TRIGGERS"
           fi
           echo "triggered=true" >> $GITHUB_OUTPUT
         else
@@ -141,7 +145,7 @@ runs:
           echo "$DETAILS_LOG"
           echo "::endgroup::"
           if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
-            echo "::notice title=Diff Triggers [${{ github.job }}]::⊘ Not fired. Triggers: $TRIGGERS_STR"
+            echo "::notice title=Diff Triggers [${{ github.job }}]::⊘ Not fired. Triggers: $ESCAPED_TRIGGERS"
           fi
           echo "triggered=false" >> $GITHUB_OUTPUT
         fi
