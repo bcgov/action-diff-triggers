@@ -141,7 +141,7 @@ runs:
           echo "$DETAILS_LOG"
           echo "::endgroup::"
           if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
-            echo "::notice title=Diff Triggers [${{ github.job }}]::🔍 Not fired. Triggers: $TRIGGERS_STR"
+            echo "::notice title=Diff Triggers [${{ github.job }}]::⊘ Not fired. Triggers: $TRIGGERS_STR"
           fi
           echo "triggered=false" >> $GITHUB_OUTPUT
         fi
