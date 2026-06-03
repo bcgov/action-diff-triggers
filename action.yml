@@ -54,10 +54,10 @@ runs:
         # Always fire if triggers are omitted
         if [ -z "${{ inputs.triggers }}" ]; then
           echo "::group::Diff Triggers — ✅ TRIGGERED | ${{ github.repository }} $CALLER_CONTEXT"
-          echo "  Triggers: (omitted — always fires)"
+          echo "  Triggers: (omitted, always fires)"
           echo "::endgroup::"
           if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
-            echo "::notice title=Diff Triggers [${{ github.job }}]::✅ Omitted (always fires)"
+            echo "::notice title=Diff Triggers [${{ github.job }}]::✅ Omitted (always fires)."
           fi
           echo "triggered=true" >> $GITHUB_OUTPUT
           exit 0
