@@ -57,7 +57,7 @@ runs:
           echo "  Triggers: (omitted — always fires)"
           echo "::endgroup::"
           if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
-            echo "::notice title=Diff Triggers [${{ github.job }}]::✅ Diff Triggers fired. Triggers: (omitted — always fires)"
+            echo "::notice title=Diff Triggers [${{ github.job }}]::✅ Omitted"
           fi
           echo "triggered=true" >> $GITHUB_OUTPUT
           exit 0
@@ -129,7 +129,7 @@ runs:
           echo "$DETAILS_LOG"
           echo "::endgroup::"
           if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
-            echo "::notice title=Diff Triggers [${{ github.job }}]::✅ Diff Triggers fired. Triggers: $TRIGGERS_STR"
+            echo "::notice title=Diff Triggers [${{ github.job }}]::✅ Fired. Triggers: $TRIGGERS_STR"
           fi
           echo "triggered=true" >> $GITHUB_OUTPUT
         else
@@ -141,7 +141,7 @@ runs:
           echo "$DETAILS_LOG"
           echo "::endgroup::"
           if [[ "$ANNOTATIONS_ENABLED" == "true" ]]; then
-            echo "::notice title=Diff Triggers [${{ github.job }}]::🔍 Diff Triggers not fired. Triggers: $TRIGGERS_STR"
+            echo "::notice title=Diff Triggers [${{ github.job }}]::🔍 Not fired. Triggers: $TRIGGERS_STR"
           fi
           echo "triggered=false" >> $GITHUB_OUTPUT
         fi
