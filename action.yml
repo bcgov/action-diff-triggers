@@ -34,7 +34,7 @@ runs:
   using: composite
   steps:
     # Checkout appropriate ref based on event type
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         token: ${{ inputs.github_token }}
         repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
