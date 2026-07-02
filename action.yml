@@ -33,6 +33,11 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Migration Warning
+      shell: bash
+      run: |
+        echo "::warning::This Action has moved to bcgov/actions/diff-triggers. Please update your workflow to use bcgov/actions/diff-triggers instead."
+
     # Checkout appropriate ref based on event type
     - uses: actions/checkout@v7
       with:
