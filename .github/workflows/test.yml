@@ -19,13 +19,13 @@ jobs:
         uses: ./
         id: test-match
         with:
-          triggers: ('README.md' 'action.yml')
+          triggers: "('README.md' 'action.yml')"
           
       - name: Test No Match (Expected: false)
         uses: ./
         id: test-no-match
         with:
-          triggers: ('path/to/nowhere')
+          triggers: "('path/to/nowhere')"
           
       - name: Verify outputs
         run: |
