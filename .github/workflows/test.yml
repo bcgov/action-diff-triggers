@@ -16,13 +16,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       
-      - name: Test Match (Expected: true)
+      - name: "Test Match (Expected: true)"
         uses: ./
         id: test-match
         with:
           triggers: "('README.md' 'action.yml' '.github/workflows/test.yml')"
           
-      - name: Test No Match (Expected: false)
+      - name: "Test No Match (Expected: false)"
         uses: ./
         id: test-no-match
         with:
