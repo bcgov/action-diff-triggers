@@ -34,7 +34,7 @@ runs:
 
     - name: Delegate to consolidated action
       id: diff
-      uses: bcgov/actions/diff-triggers@v0.2.0
+      uses: bcgov/actions/diff-triggers@feat/consolidate-diff-triggers
       with:
         triggers: ${{ inputs.triggers }}
         ref: ${{ inputs.ref }}
