@@ -1,0 +1,43 @@
+name: Test Wrapper
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test-wrapper:
+    name: Test Wrapper Execution
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Test Match (Expected: true)
+        uses: ./
+        id: test-match
+        with:
+          triggers: ('README.md' 'action.yml')
+          
+      - name: Test No Match (Expected: false)
+        uses: ./
+        id: test-no-match
+        with:
+          triggers: ('path/to/nowhere')
+          
+      - name: Verify outputs
+        run: |
+          echo "Match: ${{ steps.test-match.outputs.triggered }} (expected: true)"
+          echo "No-Match: ${{ steps.test-no-match.outputs.triggered }} (expected: false)"
+          
+          if [[ "${{ steps.test-match.outputs.triggered }}" != "true" ]]; then
+            echo "Error: Wrapper failed to trigger on match"
+            exit 1
+          fi
+          if [[ "${{ steps.test-no-match.outputs.triggered }}" != "false" ]]; then
+            echo "Error: Wrapper triggered on no match"
+            exit 1
+          fi
+          echo "Wrapper inputs and outputs verified successfully!"
