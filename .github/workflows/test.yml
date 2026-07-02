@@ -2,11 +2,12 @@ name: Test Wrapper
 
 on:
   pull_request:
-  push:
-    branches: [main]
 
-permissions:
-  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   test-wrapper:
