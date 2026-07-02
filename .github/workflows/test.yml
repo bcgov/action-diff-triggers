@@ -20,7 +20,7 @@ jobs:
         uses: ./
         id: test-match
         with:
-          triggers: "('README.md' 'action.yml')"
+          triggers: "('README.md' 'action.yml' '.github/workflows/test.yml')"
           
       - name: Test No Match (Expected: false)
         uses: ./
