@@ -33,10 +33,11 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Migration Warning
+    - name: Action moved
       shell: bash
       run: |
-        echo "::warning::This Action has moved to bcgov/actions/diff-triggers. Please update your workflow to use bcgov/actions/diff-triggers instead."
+        echo "::warning title=Action moved::This Action has moved to bcgov/actions/diff-triggers. Update workflows to bcgov/actions/diff-triggers (pin a release, not @main). Input rename: github_token → token. See https://github.com/bcgov/actions/tree/main/diff-triggers"
+
 
     # Checkout appropriate ref based on event type
     - uses: actions/checkout@v7
