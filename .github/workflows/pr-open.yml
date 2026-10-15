@@ -20,7 +20,7 @@ jobs:
       - uses: ./
         id: test
         with:
-          triggers: ('.github/' 'action.yml' '.md')
+          triggers: ('.github/' 'action.yml' '*.md')
 
   test-false:
     name: Test for False

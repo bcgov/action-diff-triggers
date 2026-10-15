@@ -1,11 +1,19 @@
 # Diff File Changes with Triggers (Moved)
 
 > [!IMPORTANT]
-> **This Action is being moved!**
+> **This action has moved to [`bcgov/actions/diff-triggers`](https://github.com/bcgov/actions/tree/main/diff-triggers).** This repository is retiring and will be archived. Update workflows to the new path, pinned to a [release](https://github.com/bcgov/actions/releases) (not `@main`):
 >
-> Development and maintenance of this action are being consolidated in the [bcgov/actions](https://github.com/bcgov/actions) repository under the [diff-triggers](https://github.com/bcgov/actions/tree/main/diff-triggers) folder.
->
-> In the near future, workflows should instead reference the new path:
 > ```yaml
 > - uses: bcgov/actions/diff-triggers@vX.Y.Z
+>   id: triggers
+>   with:
+>     triggers: |
+>       backend/
+>       frontend/
 > ```
+>
+> | Old input | New input |
+> | --- | --- |
+> | `github_token` | `token` |
+>
+> `triggers`, `ref` and `annotations` keep their names. Legacy parenthesized `triggers` lists are still accepted.
